@@ -60,7 +60,7 @@ private:
 };
 
 template <typename T>
-struct Mutex
+struct Mutex final
 {
     template <typename... Args>
     Mutex(Args &&... args) : _(std::forward<Args>(args)...)

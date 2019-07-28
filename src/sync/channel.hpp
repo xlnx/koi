@@ -6,6 +6,7 @@
 
 #include "queue.hpp"
 #include "mutex.hpp"
+#include <traits/concepts.hpp>
 
 namespace co::sync::mpsc
 {
@@ -13,12 +14,13 @@ namespace co::sync::mpsc
 namespace _
 {
 using namespace std;
+using namespace traits::concepts;
 
 template <typename T>
 struct Channel;
 
 template <typename T>
-struct ChannelImpl
+struct ChannelImpl final: NoCopy, NoMove
 {
     Queue<T> message_queue;
     Queue<shared_ptr<Mutex<T>>> parked_queue;

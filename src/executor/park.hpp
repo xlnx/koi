@@ -26,6 +26,7 @@ struct Park : Dynamic
 {
     static_assert(is_base_of<Unpark, U>::value,
                   "Park<U: Unpark>");
+    using Unpark = U;
 
     virtual U unpark() const = 0;
     virtual void park() = 0;
@@ -34,7 +35,7 @@ struct Park : Dynamic
 
 struct ParkThread;
 
-struct UnparkThread : Unpark
+struct UnparkThread final : Unpark
 {
     void unpark() const override { _.unpark(); }
 
@@ -46,7 +47,7 @@ private:
     friend struct ParkThread;
 };
 
-struct ParkThread : Park<UnparkThread>
+struct ParkThread final : Park<UnparkThread>
 {
     UnparkThread unpark() const override { return _().unparker(); }
     void park() override { _().park(); }

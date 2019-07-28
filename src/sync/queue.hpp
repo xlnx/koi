@@ -16,7 +16,7 @@ using namespace std;
 using namespace traits::concepts;
 
 template <typename T>
-struct Node : NoCopy, NoMove
+struct Node final : NoCopy, NoMove
 {
     T _;
     atomic<Node *> next;
@@ -26,7 +26,7 @@ struct Node : NoCopy, NoMove
 };
 
 template <typename T>
-struct StubNode : NoCopy, NoMove
+struct StubNode final : NoCopy, NoMove
 {
     typename aligned_storage<sizeof(T), alignof(T)>::type _;
     atomic<Node<T> *> next;
@@ -35,7 +35,7 @@ struct StubNode : NoCopy, NoMove
 };
 
 template <typename T>
-struct Queue final : NoCopy
+struct Queue final : ExplicitCopy
 {
     static_assert(sizeof(StubNode<T>) == sizeof(Node<T>),
                   "stub node size != node size");

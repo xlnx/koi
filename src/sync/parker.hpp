@@ -25,7 +25,7 @@ enum UnparkerState
     NOTIFIED = 2
 };
 
-struct UnparkerImpl : NoCopy
+struct UnparkerImpl final : NoCopy, NoMove
 {
     mutable atomic<UnparkerState> state;
     mutable mutex _;

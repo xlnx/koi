@@ -34,6 +34,20 @@ private:
     NoCopy &operator=(NoCopy const &) = default;
 };
 
+struct ExplicitCopy
+{
+    ExplicitCopy() = default;
+
+    ExplicitCopy(ExplicitCopy &&) = default;
+    ExplicitCopy &operator=(ExplicitCopy &&) = default;
+
+protected:
+    explicit ExplicitCopy(ExplicitCopy const &) = default;
+
+private:
+    ExplicitCopy &operator=(ExplicitCopy const &) = default;
+};
+
 struct NoHeap
 {
 private:
@@ -49,6 +63,7 @@ struct Dynamic
 } // namespace _
 
 using _::Dynamic;
+using _::ExplicitCopy;
 using _::NoCopy;
 using _::NoHeap;
 using _::NoMove;
