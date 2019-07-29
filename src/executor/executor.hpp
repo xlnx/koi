@@ -21,4 +21,6 @@ struct Executor : Dynamic
 
 } // namespace _
 
+using _::Executor;
+
 } // namespace co::executor

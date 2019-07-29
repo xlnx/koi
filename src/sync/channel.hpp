@@ -20,7 +20,7 @@ template <typename T>
 struct Channel;
 
 template <typename T>
-struct ChannelImpl final: NoCopy, NoMove
+struct ChannelImpl final : NoCopy, NoMove
 {
     Queue<T> message_queue;
     Queue<shared_ptr<Mutex<T>>> parked_queue;
