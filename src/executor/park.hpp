@@ -24,7 +24,7 @@ struct Unpark : Dynamic
 template <typename U>
 struct Park : Dynamic
 {
-    static_assert(is_base_of<Unpark, U>::value,
+    static_assert(is_base_of<_::Unpark, U>::value,
                   "Park<U: Unpark>");
     using Unpark = U;
 

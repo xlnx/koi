@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 include_directories("${CMAKE_SOURCE_DIR}/src/")
 
 enable_testing()
+cmake_policy(SET CMP0057 NEW)
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIR})
 

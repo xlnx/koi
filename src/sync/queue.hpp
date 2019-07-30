@@ -35,7 +35,7 @@ struct StubNode final : NoCopy, NoMove
 };
 
 template <typename T>
-struct Queue final : ExplicitCopy
+struct Queue final : NoCopy
 {
     static_assert(sizeof(StubNode<T>) == sizeof(Node<T>),
                   "stub node size != node size");
