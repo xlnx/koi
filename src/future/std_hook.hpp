@@ -21,21 +21,11 @@ namespace _
 #define CO_FUTURE_STD_HOOK_T(Future)                           \
     namespace std::experimental                                \
     {                                                          \
-    template <typename T, typename... Args>                    \
-    struct coroutine_traits<Future<T>, Args...>                \
-    {                                                          \
-        using promise_type = typename Future<T>::promise_type; \
-    };                                                         \
-    } // namespace std::experimental
-
-#define CO_FUTURE_STD_HOOK_TS(Future)                             \
-    namespace std::experimental                                   \
-    {                                                             \
-    template <typename... T, typename... Args>                    \
+    template <typename ...T, typename... Args>                    \
     struct coroutine_traits<Future<T...>, Args...>                \
-    {                                                             \
+    {                                                          \
         using promise_type = typename Future<T...>::promise_type; \
-    };                                                            \
+    };                                                         \
     } // namespace std::experimental
 
 } // namespace _
