@@ -4,10 +4,10 @@
 #include <memory>
 #include <string>
 #include <algorithm>
+#include <queue>
 #include <gtest/gtest.h>
 
-// #include <sync/queue.hpp>
-#include <future/future.hpp>
+#include <co.hpp>
 
 using namespace std;
 using namespace chrono;
@@ -15,12 +15,50 @@ using namespace chrono;
 using namespace co;
 using namespace future;
 
-Future<int> f()
+struct E : Executor
 {
-    co_return 1;
+	void spawn( Future<> const &task ) override
+	{
+		tasks.emplace( task );
+	}
+	void run(function<Future<Async<void>>()> const& entry) override
+	{
+        spawn(entry());
+		while ( !tasks.empty() )
+		{
+			LOG_CHECKPOINT();
+			auto e = tasks.front();
+			tasks.pop();
+			e.poll();
+		}
+	}
+private:
+	queue<Future<>> tasks;
+};
+
+Async<string> g()
+{
+	LOG_CHECKPOINT();
+	co_return "g";
 }
 
-TEST(test_coroutine, test_co)
+Async<string> h()
 {
-    f();
+	LOG_CHECKPOINT();
+	auto x = co_await g();
+	LOG_CHECKPOINT();
+	EXPECT_EQ( x, "g" );
+	co_return "h";
+}
+
+Async<void> i()
+{
+    co::spawn(h());
+    co_return;
+}
+
+TEST( test_coroutine, test_co )
+{
+	DefaultExecutor::set( unique_ptr<E>( new E ) );
+	co::run(i);
 }

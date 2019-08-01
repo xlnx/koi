@@ -6,13 +6,13 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 
-#include <sync/slab.hpp>
+#include <utils/slab.hpp>
 
 using namespace std;
 using namespace chrono;
 
 using namespace co;
-using namespace sync;
+using namespace utils;
 
 TEST(test_slab, test_slab)
 {

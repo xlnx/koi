@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <optional>
 #include <experimental/coroutine>
 
 #define DEBUG
@@ -15,39 +16,42 @@ namespace _
 using namespace std;
 using namespace experimental;
 
-struct Promise
+struct PromiseBase
 {
-    Promise() { LOG_CHECKPOINT(); }
-    ~Promise() { LOG_CHECKPOINT(); }
+    PromiseBase() {}
+    ~PromiseBase() { }
 
-    auto final_suspend() noexcept
-    {
-        LOG_CHECKPOINT();
-        return suspend_never{};
-    }
-    // auto return_void() noexcept {}
-    auto unhandled_exception() noexcept
-    {
-        LOG_CHECKPOINT();
-    }
+    auto final_suspend() noexcept { return suspend_never{}; }
+    auto unhandled_exception() noexcept { std::terminate(); }
 };
 
-struct Lazy : Promise
+template <typename T>
+struct Promise: PromiseBase
 {
-    auto initial_suspend() noexcept
-    {
-        LOG_CHECKPOINT();
-        return suspend_always{};
-    }
+    void return_value( T &&value ) noexcept { _ = std::move(value); }
+    T value() noexcept { return std::move( _.value() ); }
+
+private:
+    optional<T> _;
 };
 
-struct Eager : Promise
+template <>
+struct Promise<void>: PromiseBase
 {
-    auto initial_suspend() noexcept
-    {
-        LOG_CHECKPOINT();
-        return suspend_never{};
-    }
+    void return_void() noexcept {}
+    void value() noexcept {}
+};
+
+template <typename T>
+struct Lazy : Promise<T>
+{
+    auto initial_suspend() noexcept { return suspend_always{}; }
+};
+
+template <typename T>
+struct Eager : Promise<T>
+{
+    auto initial_suspend() noexcept { return suspend_never{}; }
 };
 
 } // namespace _

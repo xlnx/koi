@@ -6,7 +6,7 @@
 
 #include <traits/concepts.hpp>
 
-namespace co::sync
+namespace co::utils
 {
 
 namespace _
@@ -96,4 +96,4 @@ private:
 
 using _::Slab;
 
-} // namespace co::sync
+} // namespace co::utils
