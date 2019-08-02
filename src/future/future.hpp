@@ -1,11 +1,18 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include <functional>
 
 #include "promise.hpp"
 #include "std_hook.hpp"
 #include <traits/concepts.hpp>
+
+namespace co::runtime::_
+{
+template <typename F>
+void spawn( F &&future );
+}
 
 namespace co::future
 {
@@ -21,39 +28,22 @@ struct Future;
 template <typename T>
 struct Async;
 
-struct Executor : Dynamic
-{
-	virtual void spawn( Future<> const &future ) = 0;
-	virtual void run( Future<> const &entry ) = 0;
-};
-
-struct DefaultExecutor : Executor
-{
-	static void set( unique_ptr<Executor> &&executor ) { _() = std::move( executor ); }
-	static Executor &instance() { return *_(); }
-
-private:
-	static unique_ptr<Executor> &_()
-	{
-		static unique_ptr<Executor> _;
-		return _;
-	}
-};
-
 template <>
 struct Future<void>
 {
 	void poll() const { _.resume(); }
 
 	Future<void>( coroutine_handle<> const &_ ) :
-	  _( _ ) {}
+	  _( _ )
+	{
+	}
 
 protected:
 	mutable coroutine_handle<> _;
 };
 
 template <template <typename> typename X, typename T>
-struct Future<X<T>> : Future<>
+struct Future<X<T>> : Future<>, ExplicitCopy
 {
 	struct Promise final : future::promise::Lazy<T>
 	{
@@ -64,8 +54,10 @@ struct Future<X<T>> : Future<>
 	};
 	using promise_type = Promise;
 
-	Future( coroutine_handle<> _ ) :
-	  Future<void>( _ ) {}
+	bool await_ready() const noexcept { return false; }
+
+protected:
+	using Future<>::Future;
 
 protected:
 	coroutine_handle<Promise> &handle() const
@@ -80,10 +72,9 @@ private:
 template <typename T>
 struct Async final : Future<Async<T>>
 {
-	bool await_ready() const noexcept { return false; }
-	void await_suspend( coroutine_handle<> h ) const noexcept
+	void await_suspend( coroutine_handle<> _ ) const noexcept
 	{
-		DefaultExecutor::instance().spawn( Future<>{ h } );
+		runtime::_::spawn( Future<>( _ ) );
 	}
 	T await_resume() const noexcept
 	{
@@ -97,8 +88,6 @@ struct Async final : Future<Async<T>>
 }  // namespace _
 
 using _::Async;
-using _::DefaultExecutor;
-using _::Executor;
 using _::Future;
 
 }  // namespace co::future
@@ -108,7 +97,6 @@ CO_FUTURE_STD_HOOK_T(::co::future::Async )
 namespace co
 {
 using future::Async;
-using future::Executor;
 using future::Future;
 
 }  // namespace co

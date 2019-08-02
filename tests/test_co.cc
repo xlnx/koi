@@ -17,28 +17,6 @@ using namespace chrono;
 
 using namespace co;
 
-struct E : Executor
-{
-	void spawn( Future<> const &task ) override
-	{
-		tasks.emplace( task );
-	}
-	void run( Future<> const &entry ) override
-	{
-		spawn( entry );
-		while ( !tasks.empty() )
-		{
-			LOG_CHECKPOINT();
-			auto e = tasks.front();
-			tasks.pop();
-			e.poll();
-		}
-	}
-
-private:
-	queue<Future<>> tasks;
-};
-
 Async<string> g()
 {
 	LOG_CHECKPOINT();
@@ -56,12 +34,12 @@ Async<string> h()
 
 Async<void> i()
 {
-	co::spawn( h() );
+	auto e = h();
+	co::spawn( e );
 	co_return;
 }
 
 TEST( test_coroutine, test_co )
 {
-	DefaultExecutor::set( unique_ptr<E>( new E ) );
 	co::run( i() );
 }

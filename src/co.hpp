@@ -1,20 +1,36 @@
 #pragma once
 
 #include <future/future.hpp>
+#include <runtime/runtime.hpp>
 
 namespace co
 {
 namespace runtime
 {
-inline void run( Future<> const &entry )
+namespace _
 {
-	future::DefaultExecutor::instance().run( entry );
+inline unique_ptr<Runtime> &_()
+{
+	static auto _ = unique_ptr<Runtime>( new Runtime );
+	return _;
 }
 
-inline void spawn( Future<> const &future )
+template <typename F>
+void run( F &&entry )
 {
-	future::DefaultExecutor::instance().spawn( future );
+	_()->run( std::move(entry) );
 }
+
+template <typename F>
+void spawn( F &&future )
+{
+	_()->spawn( std::move(future) );
+}
+
+}  // namespace _
+
+using _::run;
+using _::spawn;
 
 }  // namespace runtime
 
