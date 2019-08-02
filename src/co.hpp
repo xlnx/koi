@@ -4,25 +4,21 @@
 
 namespace co
 {
-
 namespace runtime
 {
-
-inline
-void run(Future<> const& entry)
+inline void run( Future<> const &entry )
 {
-    future::DefaultExecutor::instance().run(entry);
+	future::DefaultExecutor::instance().run( entry );
 }
 
-inline
-void spawn(Future<> const& future)
+inline void spawn( Future<> const &future )
 {
-    future::DefaultExecutor::instance().spawn(future);
+	future::DefaultExecutor::instance().spawn( future );
 }
 
-}
+}  // namespace runtime
 
 using runtime::run;
 using runtime::spawn;
 
-}
+}  // namespace co

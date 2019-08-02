@@ -23,9 +23,9 @@ struct E : Executor
 	{
 		tasks.emplace( task );
 	}
-	void run( Future<> const& entry ) override
+	void run( Future<> const &entry ) override
 	{
-		spawn(entry);
+		spawn( entry );
 		while ( !tasks.empty() )
 		{
 			LOG_CHECKPOINT();
@@ -34,6 +34,7 @@ struct E : Executor
 			e.poll();
 		}
 	}
+
 private:
 	queue<Future<>> tasks;
 };
@@ -55,12 +56,12 @@ Async<string> h()
 
 Async<void> i()
 {
-    co::spawn(h());
-    co_return;
+	co::spawn( h() );
+	co_return;
 }
 
 TEST( test_coroutine, test_co )
 {
 	DefaultExecutor::set( unique_ptr<E>( new E ) );
-	co::run(i());
+	co::run( i() );
 }

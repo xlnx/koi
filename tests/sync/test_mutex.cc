@@ -14,17 +14,17 @@ using namespace chrono;
 using namespace co;
 using namespace sync;
 
-TEST(test_mutex, mutex_normal)
+TEST( test_mutex, mutex_normal )
 {
-    Mutex<string> str;
+	Mutex<string> str;
 
-    {
-        auto str_lk = str.lock();
-        *str_lk = "mutex";
-    }
+	{
+		auto str_lk = str.lock();
+		*str_lk = "mutex";
+	}
 
-    {
-        auto str_lk = str.lock();
-        EXPECT_EQ(*str_lk, "mutex");
-    }
+	{
+		auto str_lk = str.lock();
+		EXPECT_EQ( *str_lk, "mutex" );
+	}
 }

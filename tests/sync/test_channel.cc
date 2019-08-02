@@ -14,9 +14,9 @@ using namespace chrono;
 using namespace co;
 using namespace sync;
 
-TEST(test_channel, test_channel_bounded)
+TEST( test_channel, test_channel_bounded )
 {
-    using namespace mpsc;
-    auto [tx, rx] = channel<string>();
-    // tx.send();
+	using namespace mpsc;
+	auto [ tx, rx ] = channel<string>();
+	// tx.send();
 }

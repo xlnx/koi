@@ -3,7 +3,7 @@
 
 #include <result.hpp>
 
-TEST(test_result, result_ok)
+TEST( test_result, result_ok )
 {
-    auto res = co::Result<int, std::string>::Ok(1);
+	auto res = co::Result<int, std::string>::Ok( 1 );
 }

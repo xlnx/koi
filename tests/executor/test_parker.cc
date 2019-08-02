@@ -12,20 +12,20 @@ using namespace chrono;
 using namespace co;
 using namespace executor;
 
-TEST(test_parker, park_thread)
+TEST( test_parker, park_thread )
 {
-    unique_ptr<UnparkThread> unpark;
-    vector<int> ckpt;
-    auto t1 = thread([&] {
-        ParkThread park;
-        unpark.reset(new UnparkThread(park.unpark()));
-        ckpt.emplace_back(0);
-        park.park();
-        ckpt.emplace_back(1);
-    });
-    this_thread::sleep_for(100ms);
-    ckpt.emplace_back(2);
-    unpark->unpark();
-    t1.join();
-    EXPECT_EQ(ckpt, (vector<int>{0, 2, 1}));
+	unique_ptr<UnparkThread> unpark;
+	vector<int> ckpt;
+	auto t1 = thread( [&] {
+		ParkThread park;
+		unpark.reset( new UnparkThread( park.unpark() ) );
+		ckpt.emplace_back( 0 );
+		park.park();
+		ckpt.emplace_back( 1 );
+	} );
+	this_thread::sleep_for( 100ms );
+	ckpt.emplace_back( 2 );
+	unpark->unpark();
+	t1.join();
+	EXPECT_EQ( ckpt, ( vector<int>{ 0, 2, 1 } ) );
 }

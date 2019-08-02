@@ -24,7 +24,7 @@ struct Async;
 struct Executor : Dynamic
 {
 	virtual void spawn( Future<> const &future ) = 0;
-	virtual void run( Future<> const& entry ) = 0;
+	virtual void run( Future<> const &entry ) = 0;
 };
 
 struct DefaultExecutor : Executor
@@ -87,7 +87,7 @@ struct Async final : Future<Async<T>>
 	}
 	T await_resume() const noexcept
 	{
-        auto &_ = this->handle();
+		auto &_ = this->handle();
 		_.resume();
 		return std::move( _.promise().value() );
 	}
@@ -107,9 +107,8 @@ CO_FUTURE_STD_HOOK_T(::co::future::Async )
 
 namespace co
 {
-
 using future::Async;
-using future::Future;
 using future::Executor;
+using future::Future;
 
-}
+}  // namespace co
