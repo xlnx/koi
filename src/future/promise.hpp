@@ -4,9 +4,6 @@
 #include <optional>
 #include <experimental/coroutine>
 
-#define DEBUG
-#include "log.hpp"
-
 namespace co::future::promise
 {
 

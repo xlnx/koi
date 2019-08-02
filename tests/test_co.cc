@@ -9,11 +9,13 @@
 
 #include <co.hpp>
 
+#define DEBUG
+#include <future/log.hpp>
+
 using namespace std;
 using namespace chrono;
 
 using namespace co;
-using namespace future;
 
 struct E : Executor
 {
@@ -21,9 +23,9 @@ struct E : Executor
 	{
 		tasks.emplace( task );
 	}
-	void run(function<Future<Async<void>>()> const& entry) override
+	void run( Future<> const& entry ) override
 	{
-        spawn(entry());
+		spawn(entry);
 		while ( !tasks.empty() )
 		{
 			LOG_CHECKPOINT();
@@ -60,5 +62,5 @@ Async<void> i()
 TEST( test_coroutine, test_co )
 {
 	DefaultExecutor::set( unique_ptr<E>( new E ) );
-	co::run(i);
+	co::run(i());
 }

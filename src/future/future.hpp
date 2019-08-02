@@ -24,7 +24,7 @@ struct Async;
 struct Executor : Dynamic
 {
 	virtual void spawn( Future<> const &future ) = 0;
-	virtual void run(function<Future<Async<void>>()> const& entry) = 0;
+	virtual void run( Future<> const& entry ) = 0;
 };
 
 struct DefaultExecutor : Executor
@@ -104,3 +104,12 @@ using _::Future;
 }  // namespace co::future
 
 CO_FUTURE_STD_HOOK_T(::co::future::Async )
+
+namespace co
+{
+
+using future::Async;
+using future::Future;
+using future::Executor;
+
+}
