@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <traits/concepts.hpp>
 
-namespace co::sync::mpsc
+namespace koi::sync::mpsc
 {
 namespace _
 {
@@ -132,4 +132,4 @@ private:
 
 using _::Queue;
 
-}  // namespace co::sync::mpsc
+}  // namespace koi::sync::mpsc

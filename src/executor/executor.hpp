@@ -5,7 +5,7 @@
 #include <future/future.hpp>
 #include <traits/concepts.hpp>
 
-namespace co::executor
+namespace koi::executor
 {
 namespace _
 {
@@ -23,4 +23,4 @@ struct Executor : Dynamic, NoCopy
 
 using _::Executor;
 
-}  // namespace co::executor
+}  // namespace koi::executor

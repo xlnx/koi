@@ -11,7 +11,7 @@
 using namespace std;
 using namespace chrono;
 
-using namespace co;
+using namespace koi;
 using namespace sync;
 
 TEST( test_channel, test_channel_bounded )

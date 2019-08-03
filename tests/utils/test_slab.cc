@@ -11,7 +11,7 @@
 using namespace std;
 using namespace chrono;
 
-using namespace co;
+using namespace koi;
 using namespace utils;
 
 TEST( test_slab, test_slab )

@@ -4,7 +4,7 @@
 #include "std_hook.hpp"
 #include <future/future.hpp>
 
-namespace co::future::utils
+namespace koi::future::utils
 {
 namespace _
 {
@@ -74,6 +74,7 @@ private:
 
 using _::Async;
 
-}  // namespace co::future::utils
+}  // namespace koi::future::utils
 
-CO_FUTURE_STD_HOOK_T(::co::future::utils::Async )
+KOI_FUTURE_STD_HOOK_T(:
+  : koio::future::utils::Async )

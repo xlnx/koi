@@ -2,7 +2,7 @@
 
 #include "decorated.hpp"
 
-namespace co::future
+namespace koi::future
 {
 namespace _
 {
@@ -32,4 +32,4 @@ AndThen<Decorated<Self>, typename InvokeResultOf<F>::type>
 
 }  // namespace _
 
-}  // namespace co::future
+}  // namespace koi::future

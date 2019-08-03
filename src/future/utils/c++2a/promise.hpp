@@ -4,7 +4,7 @@
 #include <optional>
 #include <experimental/coroutine>
 
-namespace co::future::promise
+namespace koi::future::promise
 {
 namespace _
 {
@@ -54,4 +54,4 @@ struct Eager : Promise<T>
 using _::Eager;
 using _::Lazy;
 
-}  // namespace co::future::promise
+}  // namespace koi::future::promise

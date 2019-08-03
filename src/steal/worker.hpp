@@ -2,7 +2,7 @@
 
 #include "deque.hpp"
 
-namespace co::steal
+namespace koi::steal
 {
 namespace _
 {
@@ -75,4 +75,4 @@ using _::Flavor;
 using _::Stealer;
 using _::Worker;
 
-}  // namespace co::steal
+}  // namespace koi::steal

@@ -7,7 +7,7 @@
 #include <queue>
 #include <gtest/gtest.h>
 
-#include <co.hpp>
+#include <koi.hpp>
 
 #define DEBUG
 #include <future/log.hpp>
@@ -15,7 +15,7 @@
 using namespace std;
 using namespace chrono;
 
-using namespace co;
+using namespace koi;
 
 #ifdef CO_CXX_GE_20
 
@@ -37,7 +37,7 @@ Async<string> h()
 Async<void> i()
 {
 	auto e = h();
-	co::spawn( e );
+	koi::spawn( e );
 	co_return;
 }
 
@@ -46,6 +46,6 @@ Async<void> i()
 TEST( test_async, test_async )
 {
 #ifdef CO_CXX_GE_20
-	co::run( i() );
+	koi::run( i() );
 #endif
 }

@@ -8,23 +8,23 @@
 #include <traits/concepts.hpp>
 #include <traits/function.hpp>
 
-#ifdef CO_CXX_GE_20
+#ifdef KOI_CXX_GE_20
 #include <experimental/coroutine>
 #endif
 
-namespace co::runtime::_
+namespace koi::runtime::_
 {
 template <typename F>
 void spawn( F &&future );
 }
 
-namespace co::future
+namespace koi::future
 {
 namespace _
 {
 using namespace std;
 using namespace traits::concepts;
-#ifdef CO_CXX_GE_20
+#ifdef KOI_CXX_GE_20
 using namespace experimental;
 #endif
 
@@ -37,7 +37,7 @@ struct Future<> : Dynamic, NoCopy
 	using Output = void;
 
 	virtual void poll() = 0;
-#ifdef CO_CXX_GE_20
+#ifdef KOI_CXX_GE_20
 	template <typename P>
 	void await_suspend( coroutine_handle<P> _ ) const noexcept
 	{
@@ -54,7 +54,7 @@ struct Future : Future<>
 	using Output = T;
 
 	virtual T poll_result() = 0;
-#ifdef CO_CXX_GE_20
+#ifdef KOI_CXX_GE_20
 	T await_resume() noexcept
 	{
 		return this->poll_result();
@@ -66,11 +66,11 @@ struct Future : Future<>
 
 using _::Future;
 
-}  // namespace co::future
+}  // namespace koi::future
 
 #include "decorator/decorated.hpp"
 
-namespace co
+namespace koi
 {
 using future::Future;
 }

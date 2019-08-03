@@ -6,7 +6,7 @@
 #include <future/future.hpp>
 #include <traits/concepts.hpp>
 
-namespace co::runtime
+namespace koi::runtime
 {
 namespace _
 {
@@ -46,4 +46,4 @@ using namespace traits::concepts;
 
 using current_thread::Runtime;
 
-}  // namespace co::runtime
+}  // namespace koi::runtime

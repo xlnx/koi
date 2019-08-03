@@ -5,7 +5,7 @@
 
 #include <traits/function.hpp>
 
-namespace co::future::utils
+namespace koi::future::utils
 {
 namespace _
 {
@@ -70,4 +70,4 @@ decltype( auto ) lazy( F &&fn )
 
 using _::lazy;
 
-}  // namespace co::future::utils
+}  // namespace koi::future::utils

@@ -9,7 +9,7 @@
 using namespace std;
 using namespace chrono;
 
-using namespace co;
+using namespace koi;
 using namespace executor;
 
 TEST( test_parker, park_thread )

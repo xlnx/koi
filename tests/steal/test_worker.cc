@@ -13,9 +13,9 @@
 using namespace std;
 using namespace chrono;
 
-using namespace co;
+using namespace koi;
 using namespace sync;
-using namespace co::steal;
+using namespace koi::steal;
 
 TEST( test_steal_worker, test_worker_lifo )
 {

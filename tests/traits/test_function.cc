@@ -5,7 +5,7 @@
 #include <traits/function.hpp>
 
 using namespace std;
-using namespace co::traits;
+using namespace koi::traits;
 
 TEST( test_function, test_simple )
 {

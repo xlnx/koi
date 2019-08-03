@@ -3,7 +3,7 @@
 #include <traits/concepts.hpp>
 #include <executor/executor.hpp>
 
-namespace co::worker
+namespace koi::worker
 {
 namespace _
 {
@@ -20,4 +20,4 @@ struct Pool final : Executor, NoCopy
 
 }  // namespace _
 
-}  // namespace co::worker
+}  // namespace koi::worker

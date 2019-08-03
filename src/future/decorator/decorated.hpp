@@ -4,7 +4,7 @@
 #include <traits/concepts.hpp>
 #include <traits/function.hpp>
 
-namespace co::future
+namespace koi::future
 {
 namespace utils::_
 {
@@ -40,4 +40,4 @@ namespace util::_
 using future::_::Decorated;
 }
 
-}  // namespace co::future
+}  // namespace koi::future

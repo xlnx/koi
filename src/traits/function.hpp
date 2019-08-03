@@ -4,7 +4,7 @@
 #include <functional>
 #include <tuple>
 
-namespace co::traits
+namespace koi::traits
 {
 template <typename T>
 struct InvokeResultOf : InvokeResultOf<decltype( &T::operator() )>
@@ -80,4 +80,4 @@ struct InferFunction
 	  typename ArgumentTypeOf<F>::type>::type;
 };
 
-}  // namespace co::traits
+}  // namespace koi::traits

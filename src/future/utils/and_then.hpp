@@ -2,7 +2,7 @@
 
 #include <future/future.hpp>
 
-namespace co::future::utils
+namespace koi::future::utils
 {
 namespace _
 {
@@ -83,4 +83,4 @@ private:
 
 }  // namespace _
 
-}  // namespace co::future::utils
+}  // namespace koi::future::utils

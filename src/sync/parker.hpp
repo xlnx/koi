@@ -8,7 +8,7 @@
 
 #include <traits/concepts.hpp>
 
-namespace co::sync
+namespace koi::sync
 {
 namespace _
 {
@@ -134,4 +134,4 @@ public:
 using _::Parker;
 using _::Unparker;
 
-}  // namespace co::sync
+}  // namespace koi::sync

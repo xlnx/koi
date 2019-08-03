@@ -3,7 +3,7 @@
 #include <future/index.hpp>
 #include <runtime/runtime.hpp>
 
-namespace co
+namespace koi
 {
 namespace runtime
 {
@@ -37,4 +37,4 @@ using _::spawn;
 using runtime::run;
 using runtime::spawn;
 
-}  // namespace co
+}  // namespace koi

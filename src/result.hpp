@@ -3,7 +3,7 @@
 #include <variant>
 #include <traits/function.hpp>
 
-namespace co
+namespace koi
 {
 template <typename T, typename E>
 struct Result
@@ -30,4 +30,4 @@ private:
 	std::variant<T, std::unique_ptr<E>> _;
 };
 
-}  // namespace co
+}  // namespace koi
