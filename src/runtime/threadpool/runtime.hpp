@@ -2,13 +2,14 @@
 
 #include <memory>
 #include <utility>
+#include <thread>
 
-#include <sync/queue.hpp>
+#include "pool.hpp"
 #include <future/future.hpp>
 #include <executor/executor.hpp>
 #include <traits/concepts.hpp>
 
-namespace koi::runtime::current_thread
+namespace koi::runtime::threadpool
 {
 namespace _
 {
@@ -16,13 +17,17 @@ using namespace std;
 using namespace traits::concepts;
 using namespace future;
 
-struct Runtime final : NoCopy
+struct Runtime final NoCopy
 {
 	struct Builder final : NoCopy
 	{
-		Runtime build() { return Runtime{}; }
+		Runtime build()
+		{
+			return Runtime( *this );
+		}
 
 	private:
+		size_t core_threads = thread::hardware_concurrency();
 		friend struct Runtime;
 	};
 
@@ -30,15 +35,13 @@ struct Runtime final : NoCopy
 	{
 		void spawn( unique_ptr<Future<>> &&future ) override
 		{
-			tasks.emplace( std::move( future ) );
+			pool->spawn( std::move( future ) );
 		}
 
 	private:
-		sync::mpsc::Queue<unique_ptr<Future<>>> tasks;
 		friend struct Runtime;
+		unique_ptr<Pool> pool;
 	};
-
-	Runtime() = default;
 
 	template <typename F>
 	void run( F &&future )
@@ -46,8 +49,7 @@ struct Runtime final : NoCopy
 		this->spawn( std::move( future ) );
 		while ( !this->executor.tasks.empty() )
 		{
-			auto front = this->executor.tasks.pop();
-			front->poll();
+			//
 		}
 	}
 
@@ -58,12 +60,15 @@ struct Runtime final : NoCopy
 	}
 
 private:
+	Runtime( const Builder &builder )
+	{
+	}
+
+private:
 	Executor executor;
 	friend struct Builder;
-};
+}
 
 }  // namespace _
 
-using _::Runtime;
-
-}  // namespace koi::runtime::current_thread
+}  // namespace koi::runtime::threadpool

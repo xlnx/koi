@@ -1,23 +1,48 @@
 #pragma once
 
-#include <traits/concepts.hpp>
-#include <executor/executor.hpp>
+#include <memory>
+#include <atomic>
 
-namespace koi::worker
+#include <future/future.hpp>
+#include <steal/deque.hpp>
+#include <traits/concepts.hpp>
+// #include <executor/executor.hpp>
+
+namespace koi::runtime::threadpool
 {
 namespace _
 {
 using namespace std;
-using namespace executor;
+// using namespace executor;
+using namespace steal;
 using namespace traits::concepts;
 
-struct Pool final : Executor, NoCopy
+enum State
 {
-	void spawn( unique_ptr<Future<void>> const &future )
+	Idle,
+	Running,
+	Notified,
+	Scheduled,
+	Complete,
+	Aborted
+};
+
+struct Task
+{
+	atomic<State> state;
+	unique_ptr<Future<>> future;
+};
+
+struct Pool final : NoCopy, NoMove
+{
+	void spawn( unique_ptr<Future<>> &&future )
 	{
 	}
+
+private:
+	Deque<Task> global;
 };
 
 }  // namespace _
 
-}  // namespace koi::worker
+}  // namespace koi::runtime::threadpool
