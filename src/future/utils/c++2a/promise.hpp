@@ -20,7 +20,7 @@ struct PromiseBase
 	auto unhandled_exception() noexcept { std::terminate(); }
 };
 
-template <typename T>
+template <typename T = void>
 struct Promise : PromiseBase
 {
 	void return_value( T &&value ) noexcept { _ = std::move( value ); }
@@ -31,19 +31,19 @@ private:
 };
 
 template <>
-struct Promise<void> : PromiseBase
+struct Promise<> : PromiseBase
 {
 	void return_void() noexcept {}
 	void value() noexcept {}
 };
 
-template <typename T>
+template <typename T = void>
 struct Lazy : Promise<T>
 {
 	auto initial_suspend() noexcept { return suspend_always{}; }
 };
 
-template <typename T>
+template <typename T = void>
 struct Eager : Promise<T>
 {
 	auto initial_suspend() noexcept { return suspend_never{}; }

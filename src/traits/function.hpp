@@ -4,9 +4,7 @@
 #include <functional>
 #include <tuple>
 
-namespace co
-{
-namespace tr
+namespace co::traits
 {
 template <typename T>
 struct InvokeResultOf : InvokeResultOf<decltype( &T::operator() )>
@@ -82,6 +80,4 @@ struct InferFunction
 	  typename ArgumentTypeOf<F>::type>::type;
 };
 
-}  // namespace tr
-
-}  // namespace co
+}  // namespace co::traits

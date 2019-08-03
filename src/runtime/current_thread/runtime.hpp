@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <utility>
-#include <queue>
+#include <sync/queue.hpp>
 
 #include <future/future.hpp>
 #include <executor/executor.hpp>
@@ -34,7 +34,7 @@ struct Runtime final : NoCopy
 		}
 
 	private:
-		queue<unique_ptr<Future<>>> tasks;
+		sync::mpsc::Queue<unique_ptr<Future<>>> tasks;
 		friend struct Runtime;
 	};
 
@@ -46,9 +46,8 @@ struct Runtime final : NoCopy
 		this->spawn( std::move( future ) );
 		while ( !this->executor.tasks.empty() )
 		{
-			auto front = std::move( this->executor.tasks.front() );
+			auto front = this->executor.tasks.pop();
 			front->poll();
-			this->executor.tasks.pop();
 		}
 	}
 

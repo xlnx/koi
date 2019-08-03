@@ -1,6 +1,6 @@
 #pragma once
 
-#include <future/future.hpp>
+#include <future/index.hpp>
 #include <runtime/runtime.hpp>
 
 namespace co
@@ -18,13 +18,13 @@ inline unique_ptr<Runtime> &_()
 template <typename F>
 void run( F &&entry )
 {
-	_()->run( std::move(entry) );
+	_()->run( std::move( entry ) );
 }
 
 template <typename F>
 void spawn( F &&future )
 {
-	_()->spawn( std::move(future) );
+	_()->spawn( std::move( future ) );
 }
 
 }  // namespace _

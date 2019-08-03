@@ -17,6 +17,8 @@ using namespace chrono;
 
 using namespace co;
 
+#ifdef CO_CXX_GE_20
+
 Async<string> g()
 {
 	LOG_CHECKPOINT();
@@ -39,7 +41,11 @@ Async<void> i()
 	co_return;
 }
 
-TEST( test_coroutine, test_co )
+#endif
+
+TEST( test_async, test_async )
 {
+#ifdef CO_CXX_GE_20
 	co::run( i() );
+#endif
 }

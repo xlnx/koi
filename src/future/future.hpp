@@ -4,9 +4,13 @@
 #include <memory>
 #include <functional>
 
-#include "promise.hpp"
-#include "std_hook.hpp"
+#include <version.hpp>
 #include <traits/concepts.hpp>
+#include <traits/function.hpp>
+
+#ifdef CO_CXX_GE_20
+#include <experimental/coroutine>
+#endif
 
 namespace co::runtime::_
 {
@@ -19,84 +23,54 @@ namespace co::future
 namespace _
 {
 using namespace std;
-using namespace experimental;
 using namespace traits::concepts;
+#ifdef CO_CXX_GE_20
+using namespace experimental;
+#endif
 
 template <typename F = void>
 struct Future;
 
-template <typename T>
-struct Async;
-
 template <>
-struct Future<void>
+struct Future<> : Dynamic, NoCopy
 {
-	void poll() const { _.resume(); }
+	using Output = void;
 
-	Future<void>( coroutine_handle<> const &_ ) :
-	  _( _ )
+	virtual void poll() = 0;
+#ifdef CO_CXX_GE_20
+	template <typename P>
+	void await_suspend( coroutine_handle<P> _ ) const noexcept
 	{
+		using Future = typename P::Future;
+		runtime::_::spawn( Future( _ ) );
 	}
-
-protected:
-	mutable coroutine_handle<> _;
-};
-
-template <template <typename> typename X, typename T>
-struct Future<X<T>> : Future<>, ExplicitCopy
-{
-	struct Promise final : future::promise::Lazy<T>
-	{
-		X<T> get_return_object() noexcept
-		{
-			return X<T>( coroutine_handle<Promise>::from_promise( *this ) );
-		}
-	};
-	using promise_type = Promise;
-
 	bool await_ready() const noexcept { return false; }
-
-protected:
-	using Future<>::Future;
-
-protected:
-	coroutine_handle<Promise> &handle() const
-	{
-		return reinterpret_cast<coroutine_handle<Promise> &>( _ );
-	}
-
-private:
-	using Future<>::_;
+#endif
 };
 
 template <typename T>
-struct Async final : Future<Async<T>>
+struct Future : Future<>
 {
-	void await_suspend( coroutine_handle<> _ ) const noexcept
+	using Output = T;
+
+	virtual T poll_result() = 0;
+#ifdef CO_CXX_GE_20
+	T await_resume() noexcept
 	{
-		runtime::_::spawn( Future<>( _ ) );
+		return this->poll_result();
 	}
-	T await_resume() const noexcept
-	{
-		auto &_ = this->handle();
-		_.resume();
-		return std::move( _.promise().value() );
-	}
-	using Future<Async>::Future;
+#endif
 };
 
 }  // namespace _
 
-using _::Async;
 using _::Future;
 
 }  // namespace co::future
 
-CO_FUTURE_STD_HOOK_T(::co::future::Async )
+#include "decorator/decorated.hpp"
 
 namespace co
 {
-using future::Async;
 using future::Future;
-
-}  // namespace co
+}
