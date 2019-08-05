@@ -1,5 +1,7 @@
 # Koi
 
+[![Build Status](https://dev.azure.com/qwq0433/qwq/_apis/build/status/xlnx.koi?branchName=master)](https://dev.azure.com/qwq0433/qwq/_build/latest?definitionId=1&branchName=master)
+
 Koi is an async library for c++20, inspired by **tokio**. 
 
 ## Status

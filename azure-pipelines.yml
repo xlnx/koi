@@ -10,10 +10,17 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
+- checkout: self
+  submodules: recursive
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    mkdir build.debug
+  displayName: Make build directory, debug
+- task: CMake@1
+  inputs: 
+    workingDirectory: 'build.debug'
+    cmakeArgs: '-DCMAKE_BUILD_TYPE=Debug ..'
+- script: |
+    cd build.debug
+    make
+    ./test_all
+  displayName: Run tests, debug
