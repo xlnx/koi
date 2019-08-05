@@ -7,7 +7,9 @@
 #include <executor/park.hpp>
 #include "park.hpp"
 
-namespace koi::worker
+namespace koi
+{
+namespace worker
 {
 namespace _
 {
@@ -36,4 +38,6 @@ struct Worker
 
 using _::Worker;
 
-}  // namespace koi::worker
+}  // namespace worker
+
+}  // namespace koi

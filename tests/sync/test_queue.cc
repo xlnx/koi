@@ -56,14 +56,14 @@ TEST( test_queue, mpsc_queue_threads )
 	{
 		ths.emplace_back( [&, i] {
 			q.emplace( i );
-			this_thread::sleep_for( 100ms );
+			this_thread::sleep_for( microseconds( 100 ) );
 			q.emplace( i );
-			this_thread::sleep_for( 100ms );
+			this_thread::sleep_for( microseconds( 100 ) );
 			q.emplace( i );
 		} );
 	}
 
-	this_thread::sleep_for( 50ms );
+	this_thread::sleep_for( microseconds( 50 ) );
 
 	vector<int> res;
 	for ( int i = 0; i != 2; ++i )
@@ -71,7 +71,7 @@ TEST( test_queue, mpsc_queue_threads )
 		res.emplace_back( q.pop() );
 	}
 
-	this_thread::sleep_for( 50ms );
+	this_thread::sleep_for( microseconds( 50 ) );
 	for ( int i = 0; i != 2; ++i )
 	{
 		res.emplace_back( q.pop() );

@@ -8,7 +8,11 @@
 #include "mutex.hpp"
 #include <traits/concepts.hpp>
 
-namespace koi::sync::mpsc
+namespace koi
+{
+namespace sync
+{
+namespace mpsc
 {
 namespace _
 {
@@ -87,4 +91,8 @@ pair<Sender<T>, Receiver<T>>
 
 using _::channel;
 
-}  // namespace koi::sync::mpsc
+}  // namespace mpsc
+
+}  // namespace sync
+
+}  // namespace koi

@@ -23,7 +23,7 @@ TEST( test_parker, park_thread )
 		park.park();
 		ckpt.emplace_back( 1 );
 	} );
-	this_thread::sleep_for( 100ms );
+	this_thread::sleep_for( milliseconds( 100 ) );
 	ckpt.emplace_back( 2 );
 	unpark->unpark();
 	t1.join();

@@ -8,7 +8,11 @@
 #include <executor/executor.hpp>
 #include <traits/concepts.hpp>
 
-namespace koi::runtime::current_thread
+namespace koi
+{
+namespace runtime
+{
+namespace current_thread
 {
 namespace _
 {
@@ -66,4 +70,8 @@ private:
 
 using _::Runtime;
 
-}  // namespace koi::runtime::current_thread
+}  // namespace current_thread
+
+}  // namespace runtime
+
+}  // namespace koi

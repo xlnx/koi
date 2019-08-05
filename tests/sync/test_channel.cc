@@ -17,6 +17,12 @@ using namespace sync;
 TEST( test_channel, test_channel_bounded )
 {
 	using namespace mpsc;
+#ifdef KOI_CXX_GE_17
 	auto [ tx, rx ] = channel<string>();
+#else
+	auto x = channel<string>();
+	auto tx = std::move( x.first );
+	auto rx = std::move( x.second );
+#endif
 	// tx.send();
 }

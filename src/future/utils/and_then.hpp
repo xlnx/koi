@@ -1,8 +1,13 @@
 #pragma once
 
 #include <future/future.hpp>
+#include <utils/option.hpp>
 
-namespace koi::future::utils
+namespace koi
+{
+namespace future
+{
+namespace utils
 {
 namespace _
 {
@@ -78,9 +83,13 @@ struct AndThen final : Future<B>
 private:
 	A first;
 	Second fn;
-	optional<B> _;
+	Option<B> _;
 };
 
 }  // namespace _
 
-}  // namespace koi::future::utils
+}  // namespace utils
+
+}  // namespace future
+
+}  // namespace koi

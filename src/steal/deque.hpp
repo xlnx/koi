@@ -5,7 +5,9 @@
 #include <traits/concepts.hpp>
 #include <sync/mutex.hpp>
 
-namespace koi::steal
+namespace koi
+{
+namespace steal
 {
 namespace _
 {
@@ -45,4 +47,6 @@ private:
 
 using _::Deque;
 
-}  // namespace koi::steal
+}  // namespace steal
+
+}  // namespace koi

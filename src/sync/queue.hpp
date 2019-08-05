@@ -3,6 +3,7 @@
 #include <memory>
 #include <utility>
 #include <atomic>
+#include <cstddef>
 #include <type_traits>
 #include <traits/concepts.hpp>
 
@@ -41,8 +42,7 @@ struct Queue final : NoCopy
 {
 	static_assert( sizeof( StubNode<T> ) == sizeof( Node<T> ),
 				   "stub node size != node size" );
-	static_assert( &( (Node<T> *)nullptr )->next ==
-					 &( (StubNode<T> *)nullptr )->next,
+	static_assert( offsetof(Node<T>, next) == offsetof(StubNode<T>, next),
 				   "stub node layout != node layout" );
 
 	Queue()

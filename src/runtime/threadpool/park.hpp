@@ -8,7 +8,9 @@
 #include <traits/concepts.hpp>
 #include <executor/park.hpp>
 
-namespace koi::worker
+namespace koi
+{
+namespace worker
 {
 namespace _
 {
@@ -65,4 +67,6 @@ private:
 
 }  // namespace _
 
-}  // namespace koi::worker
+}  // namespace worker
+
+}  // namespace koi

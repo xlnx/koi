@@ -4,11 +4,11 @@
 #define KOI_CXX_GE_20
 #endif
 
-#if ( __cplusplus > 201402L )  // c++17
+#if ( __cplusplus >= 201703L )  // c++17
 #define KOI_CXX_GE_17
 #endif
 
-#if ( __cplusplus > 201103L )  // c++14
+#if ( __cplusplus >= 201402L )  // c++14
 #define KOI_CXX_GE_14
 #endif
 

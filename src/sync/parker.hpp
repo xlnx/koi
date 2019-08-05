@@ -5,10 +5,13 @@
 #include <condition_variable>
 #include <atomic>
 #include <chrono>
+#include <cassert>
 
 #include <traits/concepts.hpp>
 
-namespace koi::sync
+namespace koi
+{
+namespace sync
 {
 namespace _
 {
@@ -134,4 +137,6 @@ public:
 using _::Parker;
 using _::Unparker;
 
-}  // namespace koi::sync
+}  // namespace sync
+
+}  // namespace koi

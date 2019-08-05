@@ -2,17 +2,22 @@
 
 #include <future/future.hpp>
 #include <future/decorator/decorated.hpp>
-
+#include <utils/option.hpp>
 #include <traits/function.hpp>
 
-namespace koi::future::utils
+namespace koi
+{
+namespace future
+{
+namespace utils
 {
 namespace _
 {
 using namespace std;
 using namespace traits;
 
-using namespace util::_;
+using namespace koi::utils;
+using namespace koi::utils::_;
 
 // template <typename R>
 // Lazy<R> lazy( function<R()> &&fn );
@@ -54,11 +59,15 @@ private:
 	// template <typename F>
 	// friend Lazy<F> lazy();
 	function<R()> fn;
-	optional<R> _;
+	Option<R> _;
 };
 
 template <typename F>
-decltype( auto ) lazy( F &&fn )
+Decorated<
+  Lazy<
+	typename InvokeResultOf<
+	  typename InferFunction<F>::type>::type>>
+  lazy( F &&fn )
 {
 	using TaskFn = typename InferFunction<F>::type;
 	using R = typename InvokeResultOf<TaskFn>::type;
@@ -70,4 +79,8 @@ decltype( auto ) lazy( F &&fn )
 
 using _::lazy;
 
-}  // namespace koi::future::utils
+}  // namespace utils
+
+}  // namespace future
+
+}  // namespace koi

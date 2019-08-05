@@ -5,7 +5,9 @@
 #include <sync/parker.hpp>
 #include <traits/concepts.hpp>
 
-namespace koi::executor
+namespace koi
+{
+namespace executor
 {
 namespace _
 {
@@ -67,4 +69,6 @@ using _::ParkThread;
 using _::Unpark;
 using _::UnparkThread;
 
-}  // namespace koi::executor
+}  // namespace executor
+
+}  // namespace koi

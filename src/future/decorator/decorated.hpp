@@ -4,16 +4,21 @@
 #include <traits/concepts.hpp>
 #include <traits/function.hpp>
 
-namespace koi::future
+namespace koi
 {
-namespace utils::_
+namespace future
+{
+namespace utils
+{
+namespace _
 {
 using namespace traits;
 
 template <typename A, typename F>
 struct AndThen;
+}  // namespace _
 
-}  // namespace utils::_
+}  // namespace utils
 
 namespace _
 {
@@ -35,9 +40,15 @@ struct Decorated final : Self
 
 }  // namespace _
 
-namespace util::_
+namespace utils
+{
+namespace _
 {
 using future::_::Decorated;
 }
 
-}  // namespace koi::future
+}  // namespace utils
+
+}  // namespace future
+
+}  // namespace koi

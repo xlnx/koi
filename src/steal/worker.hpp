@@ -2,7 +2,9 @@
 
 #include "deque.hpp"
 
-namespace koi::steal
+namespace koi
+{
+namespace steal
 {
 namespace _
 {
@@ -57,6 +59,7 @@ struct Worker final : NoCopy
 		case Fifo:
 			return _->pop_front();
 		}
+		assert( false && "unreachable" );
 	}
 
 	Stealer stealer()
@@ -75,4 +78,6 @@ using _::Flavor;
 using _::Stealer;
 using _::Worker;
 
-}  // namespace koi::steal
+}  // namespace steal
+
+}  // namespace koi

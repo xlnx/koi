@@ -5,7 +5,9 @@
 
 #include <traits/concepts.hpp>
 
-namespace koi::sync
+namespace koi
+{
+namespace sync
 {
 namespace _
 {
@@ -84,4 +86,6 @@ private:
 
 using _::Mutex;
 
-}  // namespace koi::sync
+}  // namespace sync
+
+}  // namespace koi

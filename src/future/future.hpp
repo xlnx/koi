@@ -12,13 +12,23 @@
 #include <experimental/coroutine>
 #endif
 
-namespace koi::runtime::_
+namespace koi
+{
+namespace runtime
+{
+namespace _
 {
 template <typename F>
 void spawn( F &&future );
 }
 
-namespace koi::future
+}  // namespace runtime
+
+}  // namespace koi
+
+namespace koi
+{
+namespace future
 {
 namespace _
 {
@@ -66,7 +76,9 @@ struct Future : Future<>
 
 using _::Future;
 
-}  // namespace koi::future
+}  // namespace future
+
+}  // namespace koi
 
 #include "decorator/decorated.hpp"
 

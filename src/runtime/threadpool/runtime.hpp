@@ -9,7 +9,11 @@
 #include <executor/executor.hpp>
 #include <traits/concepts.hpp>
 
-namespace koi::runtime::threadpool
+namespace koi
+{
+namespace runtime
+{
+namespace threadpool
 {
 namespace _
 {
@@ -67,8 +71,12 @@ private:
 private:
 	Executor executor;
 	friend struct Builder;
-}
+};
 
 }  // namespace _
 
-}  // namespace koi::runtime::threadpool
+}  // namespace threadpool
+
+}  // namespace runtime
+
+}  // namespace koi

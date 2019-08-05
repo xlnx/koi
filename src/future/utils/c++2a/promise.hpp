@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <optional>
+#include <utils/option.hpp>
 #include <experimental/coroutine>
 
 namespace koi::future::promise
@@ -27,7 +27,7 @@ struct Promise : PromiseBase
 	T value() noexcept { return std::move( _.value() ); }
 
 private:
-	optional<T> _;
+	Option<T> _;
 };
 
 template <>

@@ -8,7 +8,11 @@
 #include <traits/concepts.hpp>
 // #include <executor/executor.hpp>
 
-namespace koi::runtime::threadpool
+namespace koi
+{
+namespace runtime
+{
+namespace threadpool
 {
 namespace _
 {
@@ -45,4 +49,8 @@ private:
 
 }  // namespace _
 
-}  // namespace koi::runtime::threadpool
+}  // namespace threadpool
+
+}  // namespace runtime
+
+}  // namespace koi
