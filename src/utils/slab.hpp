@@ -6,7 +6,9 @@
 
 #include <traits/concepts.hpp>
 
-namespace koi::utils
+namespace koi
+{
+namespace utils
 {
 namespace _
 {
@@ -103,4 +105,6 @@ private:
 
 using _::Slab;
 
-}  // namespace koi::utils
+}  // namespace utils
+
+}  // namespace koi

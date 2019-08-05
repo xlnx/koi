@@ -4,7 +4,9 @@
 
 #include <traits/concepts.hpp>
 
-namespace koi::utils
+namespace koi
+{
+namespace utils
 {
 namespace _
 {
@@ -26,4 +28,6 @@ private:
 
 using _::Bomb;
 
-}  // namespace koi::utils
+}  // namespace utils
+
+}  // namespace koi

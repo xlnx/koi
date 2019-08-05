@@ -2,7 +2,11 @@
 
 #include <utility>
 
-namespace koi::traits::concepts
+namespace koi
+{
+namespace traits
+{
+namespace concepts
 {
 namespace _
 {
@@ -66,4 +70,8 @@ using _::NoCopy;
 using _::NoHeap;
 using _::NoMove;
 
-}  // namespace koi::traits::concepts
+}  // namespace concepts
+
+}  // namespace traits
+
+}  // namespace koi

@@ -7,7 +7,11 @@
 #include <type_traits>
 #include <traits/concepts.hpp>
 
-namespace koi::sync::mpsc
+namespace koi
+{
+namespace sync
+{
+namespace mpsc
 {
 namespace _
 {
@@ -42,7 +46,7 @@ struct Queue final : NoCopy
 {
 	static_assert( sizeof( StubNode<T> ) == sizeof( Node<T> ),
 				   "stub node size != node size" );
-	static_assert( offsetof(Node<T>, next) == offsetof(StubNode<T>, next),
+	static_assert( offsetof( Node<T>, next ) == offsetof( StubNode<T>, next ),
 				   "stub node layout != node layout" );
 
 	Queue()
@@ -132,4 +136,8 @@ private:
 
 using _::Queue;
 
-}  // namespace koi::sync::mpsc
+}  // namespace mpsc
+
+}  // namespace sync
+
+}  // namespace koi
