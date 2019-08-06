@@ -18,10 +18,8 @@ struct NoMove
 
 	NoMove( NoMove const & ) = default;
 	NoMove &operator=( NoMove const & ) = default;
-
-private:
-	NoMove( NoMove && ) = default;
-	NoMove &operator=( NoMove && ) = default;
+	NoMove( NoMove && ) = delete;
+	NoMove &operator=( NoMove && ) = delete;
 };
 
 struct NoCopy
@@ -30,10 +28,8 @@ struct NoCopy
 
 	NoCopy( NoCopy && ) = default;
 	NoCopy &operator=( NoCopy && ) = default;
-
-private:
-	NoCopy( NoCopy const & ) = default;
-	NoCopy &operator=( NoCopy const & ) = default;
+	NoCopy( NoCopy const & ) = delete;
+	NoCopy &operator=( NoCopy const & ) = delete;
 };
 
 struct ExplicitCopy

@@ -46,7 +46,7 @@ struct Lazy : Future<R>
 	R poll_result() override
 	{
 		this->poll();
-		return std::move( _ );
+		return std::move( _.value() );
 	}
 
 	// private:
@@ -65,8 +65,7 @@ private:
 template <typename F>
 Decorated<
   Lazy<
-	typename InvokeResultOf<
-	  typename InferFunction<F>::type>::type>>
+	typename InvokeResultOf<F>::type>>
   lazy( F &&fn )
 {
 	using TaskFn = typename InferFunction<F>::type;

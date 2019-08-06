@@ -21,13 +21,14 @@ using namespace koi;
 TEST( test_and_then, test_and_then )
 {
 	vector<int> a;
-	koi::run(
-	  future::lazy( [&] {
-		  a.emplace_back( 1 );
-		  a.emplace_back( 2 );
-	  } )
-		.and_then( [&] {
-			a.emplace_back( 3 );
-		} ) );
+	auto job = future::lazy( [&] {
+				   a.emplace_back( 1 );
+				   a.emplace_back( 2 );
+				   return 3;
+			   } )
+				 .and_then( [&]( int b ) {
+					 a.emplace_back( 3 );
+				 } );
+	koi::run( std::move( job ) );
 	EXPECT_EQ( a, ( decltype( a ){ 1, 2, 3 } ) );
 }

@@ -31,7 +31,10 @@ struct Decorated final : Self
 				   "Decorated must be derived from Future<>" );
 
 	template <typename F>
-	AndThen<Decorated, typename InvokeResultOf<F>::type>
+	Decorated<
+	  AndThen<
+		Decorated<Self>,
+		typename InvokeResultOf<F>::type>>
 	  and_then( F &&fn ) &&;
 
 	Decorated( Self &&self ) :

@@ -50,7 +50,7 @@ struct Runtime final NoCopy
 	template <typename F>
 	void run( F &&future )
 	{
-		this->spawn( std::move( future ) );
+		this->spawn( std::forward<F>( future ) );
 		while ( !this->executor.tasks.empty() )
 		{
 			//
@@ -60,7 +60,9 @@ struct Runtime final NoCopy
 	template <typename F>
 	void spawn( F &&future )
 	{
-		this->executor.spawn( unique_ptr<F>( new F( std::move( future ) ) ) );
+		using FutTy = typename decay<F>::type;
+		this->executor.spawn( unique_ptr<FutTy>(
+		  new FutTy( std::forward<F>( future ) ) ) );
 	}
 
 private:

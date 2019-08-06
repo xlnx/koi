@@ -18,13 +18,13 @@ inline unique_ptr<Runtime> &_()
 template <typename F>
 void run( F &&entry )
 {
-	_()->run( std::move( entry ) );
+	_()->run( std::forward<F>( entry ) );
 }
 
 template <typename F>
 void spawn( F &&future )
 {
-	_()->spawn( std::move( future ) );
+	_()->spawn( std::forward<F>( future ) );
 }
 
 }  // namespace _

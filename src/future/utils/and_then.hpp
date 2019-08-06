@@ -45,7 +45,7 @@ template <typename A, typename B = void>
 struct AndThen;
 
 template <typename A>
-struct AndThen<A> final : Future<>
+struct AndThen<A> : Future<>
 {
 	using Second = typename NextFn<A>::type;
 
@@ -63,7 +63,7 @@ private:
 };
 
 template <typename A, typename B>
-struct AndThen final : Future<B>
+struct AndThen : Future<B>
 {
 	using Second = typename NextFn<A, B>::type;
 

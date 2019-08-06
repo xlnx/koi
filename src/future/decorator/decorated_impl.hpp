@@ -10,27 +10,18 @@ namespace _
 {
 template <typename Self>
 template <typename F>
-AndThen<Decorated<Self>, typename InvokeResultOf<F>::type>
+Decorated<
+  AndThen<
+	Decorated<Self>,
+	typename InvokeResultOf<F>::type>>
   Decorated<Self>::and_then( F &&fn ) &&
 {
 	return AndThen<
-	  Decorated<Self>,
+	  Decorated,
 	  typename InvokeResultOf<F>::type>(
 	  std::move( *this ),
-	  std::move( fn ) );
+	  std::forward<F>( fn ) );
 }
-
-// template <typename Self>
-// template <typename F>
-// AndThen<Decorated<Self>, typename InvokeResultOf<F>::type>
-//   Decorated<Self>::and_then( F &&fn ) &&
-// {
-// 	return AndThen<
-// 	  Decorated<Self>,
-// 	  typename InvokeResultOf<F>::type>(
-// 	  std::move( *this ),
-// 	  std::move( fn ) );
-// }
 
 }  // namespace _
 
