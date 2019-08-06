@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include <future/future.hpp>
 #include <traits/concepts.hpp>
 #include <traits/function.hpp>
@@ -12,10 +14,15 @@ namespace utils
 {
 namespace _
 {
+using namespace std;
 using namespace traits;
 
 template <typename A, typename F>
 struct Then;
+
+template <typename F, typename O>
+struct Shared;
+
 }  // namespace _
 
 }  // namespace utils
@@ -36,6 +43,11 @@ struct Decorated final : Self
 		Decorated<Self>,
 		typename InvokeResultOf<F>::type>>
 	  then( F &&fn ) &&;
+
+	Decorated<
+	  Shared<
+		Decorated<Self>, typename Self::Output>>
+	  shared() &&;
 
 	Decorated( Self &&self ) :
 	  Self( std::move( self ) ) {}

@@ -30,6 +30,17 @@ namespace koi
 {
 namespace future
 {
+namespace utils
+{
+namespace _
+{
+template <typename F, typename O>
+struct Shared;
+
+}
+
+}  // namespace utils
+
 namespace _
 {
 using namespace std;
@@ -42,7 +53,7 @@ template <typename F = void>
 struct Future;
 
 template <>
-struct Future<> : Dynamic, NoCopy
+struct Future<> : Dynamic
 {
 	using Output = void;
 
@@ -56,6 +67,20 @@ struct Future<> : Dynamic, NoCopy
 	}
 	bool await_ready() const noexcept { return false; }
 #endif
+
+	Future() = default;
+	Future( Future && ) = default;
+	Future &operator=( Future && ) = default;
+
+private:
+	Future( Future const & ) = default;
+	Future &operator=( Future const & ) = default;
+
+private:
+	template <typename T>
+	friend struct Future;
+	template <typename F, typename O>
+	friend struct utils::_::Shared;
 };
 
 template <typename T>
@@ -70,6 +95,16 @@ struct Future : Future<>
 		return this->poll_result();
 	}
 #endif
+
+	Future() = default;
+	Future( Future && ) = default;
+	Future &operator=( Future && ) = default;
+
+private:
+	Future( Future const & ) = default;
+	Future &operator=( Future const & ) = default;
+	template <typename F, typename O>
+	friend struct utils::_::Shared;
 };
 
 }  // namespace _

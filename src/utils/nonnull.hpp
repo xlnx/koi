@@ -57,7 +57,7 @@ struct Box final
 	}
 
 	T &operator*() const { return *_; }
-	T *operator->() const { return _; }
+	T *operator->() const { return &*_; }
 
 private:
 	unique_ptr<T> _;
@@ -79,7 +79,7 @@ struct Arc final
 	}
 
 	T &operator*() const { return *_; }
-	T *operator->() const { return _; }
+	T *operator->() const { return &*_; }
 
 private:
 	shared_ptr<T> _;

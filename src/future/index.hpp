@@ -6,6 +6,7 @@
 #include "utils/c++2a/async.hpp"
 #endif
 #include "utils/lazy.hpp"
+#include "utils/shared.hpp"
 #include "utils/then.hpp"
 
 namespace koi

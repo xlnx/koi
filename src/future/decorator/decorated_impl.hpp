@@ -23,6 +23,17 @@ Decorated<
 	  std::forward<F>( fn ) );
 }
 
+template <typename Self>
+Decorated<
+  Shared<
+	  Decorated<Self>, typename Self::Output>>
+  Decorated<Self>::shared() &&
+{
+	return Shared<
+	  Decorated<Self>>(
+	  std::move( *this ) );
+}
+
 }  // namespace _
 
 }  // namespace future
