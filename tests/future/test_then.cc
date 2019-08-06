@@ -18,7 +18,7 @@ using namespace chrono;
 
 using namespace koi;
 
-TEST( test_and_then, test_and_then )
+TEST( test_then, test_then )
 {
 	vector<int> a;
 	auto job = future::lazy( [&] {
@@ -26,7 +26,7 @@ TEST( test_and_then, test_and_then )
 				   a.emplace_back( 2 );
 				   return 3;
 			   } )
-				 .and_then( [&]( int b ) {
+				 .then( [&]( int b ) {
 					 a.emplace_back( 3 );
 				 } );
 	koi::run( std::move( job ) );

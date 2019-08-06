@@ -42,16 +42,16 @@ struct NextFn
 };
 
 template <typename A, typename B = void>
-struct AndThen;
+struct Then;
 
 template <typename A>
-struct AndThen<A> : Future<>
+struct Then<A> : Future<>
 {
 	using Second = typename NextFn<A>::type;
 
 	void poll() { NextFn<A>::poll( first, fn ); }
 
-	AndThen( A &&a, Second &&fn ) :
+	Then( A &&a, Second &&fn ) :
 	  first( std::move( a ) ),
 	  fn( std::move( fn ) )
 	{
@@ -63,7 +63,7 @@ private:
 };
 
 template <typename A, typename B>
-struct AndThen : Future<B>
+struct Then : Future<B>
 {
 	using Second = typename NextFn<A, B>::type;
 
@@ -74,7 +74,7 @@ struct AndThen : Future<B>
 		return std::move( _ );
 	}
 
-	AndThen( A &&a, Second &&fn ) :
+	Then( A &&a, Second &&fn ) :
 	  first( std::move( a ) ),
 	  fn( std::move( fn ) )
 	{

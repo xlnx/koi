@@ -15,7 +15,7 @@ namespace _
 using namespace traits;
 
 template <typename A, typename F>
-struct AndThen;
+struct Then;
 }  // namespace _
 
 }  // namespace utils
@@ -32,10 +32,10 @@ struct Decorated final : Self
 
 	template <typename F>
 	Decorated<
-	  AndThen<
+	  Then<
 		Decorated<Self>,
 		typename InvokeResultOf<F>::type>>
-	  and_then( F &&fn ) &&;
+	  then( F &&fn ) &&;
 
 	Decorated( Self &&self ) :
 	  Self( std::move( self ) ) {}

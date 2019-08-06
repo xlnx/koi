@@ -11,12 +11,12 @@ namespace _
 template <typename Self>
 template <typename F>
 Decorated<
-  AndThen<
+  Then<
 	Decorated<Self>,
 	typename InvokeResultOf<F>::type>>
-  Decorated<Self>::and_then( F &&fn ) &&
+  Decorated<Self>::then( F &&fn ) &&
 {
-	return AndThen<
+	return Then<
 	  Decorated,
 	  typename InvokeResultOf<F>::type>(
 	  std::move( *this ),
