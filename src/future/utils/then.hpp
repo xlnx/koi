@@ -67,11 +67,11 @@ struct Then : Future<B>
 {
 	using Second = typename NextFn<A, B>::type;
 
-	void poll() { _ = NextFn<A>::poll( first, fn ); }
+	void poll() override { _ = NextFn<A, B>::poll( first, fn ); }
 	B poll_result() override
 	{
 		this->poll();
-		return std::move( _ );
+		return std::move( _.value() );
 	}
 
 	Then( A &&a, Second &&fn ) :
