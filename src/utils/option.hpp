@@ -83,7 +83,7 @@ struct Option final
 			reinterpret_cast<T &&>( other._ ) ) );
 	}
 
-	template <typename U = T>
+	template <typename U = T, typename = typename enable_if<is_constructible<T, U>::value>::type>
 	Option( U &&value ) :
 	  has( true )
 	{
@@ -103,7 +103,7 @@ struct Option final
 		has = false;
 		return *this;
 	}
-	template <typename U = T>
+	template <typename U = T, typename = typename enable_if<is_constructible<T, U>::value>::type>
 	Option &operator=( U &&value )
 	{
 		if ( has ) reinterpret_cast<T *>( &this->_ )->~T();

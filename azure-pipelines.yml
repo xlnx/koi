@@ -10,17 +10,46 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- script: |
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    sudo apt-get update
+    sudo apt-get install -y ninja-build libc++-dev libc++abi-dev libc++abi1 libstdc++-7-dev gcc-7 g++-7
+    # sudo apt-get install clang-6.0 clang++-6.0
 - checkout: self
   submodules: recursive
 - script: |
-    mkdir build.debug
-  displayName: Make build directory, debug
+    mkdir build.debug.gnu.cxx11
+  displayName: Make build directory, debug.gnu.cxx11
 - task: CMake@1
   inputs: 
-    workingDirectory: 'build.debug'
-    cmakeArgs: '-DCMAKE_BUILD_TYPE=Debug ..'
+    workingDirectory: 'build.debug.gnu.cxx11'
+    cmakeArgs: '-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_STANDARD=11 ..'
 - script: |
-    cd build.debug
+    cd build.debug.gnu.cxx11
     make
     ./test_all
-  displayName: Run tests, debug
+  displayName: Run tests, debug.gnu.cxx11
+- script: |
+    mkdir build.debug.gnu.cxx14
+  displayName: Make build directory, debug.gnu.cxx14
+- task: CMake@1
+  inputs: 
+    workingDirectory: 'build.debug.gnu.cxx14'
+    cmakeArgs: '-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_STANDARD=14 ..'
+- script: |
+    cd build.debug.gnu.cxx14
+    make
+    ./test_all
+  displayName: Run tests, debug.gnu.cxx14
+- script: |
+    mkdir build.debug.gnu.cxx17
+  displayName: Make build directory, debug.gnu.cxx17
+- task: CMake@1
+  inputs: 
+    workingDirectory: 'build.debug.gnu.cxx17'
+    cmakeArgs: '-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_STANDARD=17 ..'
+- script: |
+    cd build.debug.gnu.cxx17
+    make
+    ./test_all
+  displayName: Run tests, debug.gnu.cxx17

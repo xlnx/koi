@@ -16,11 +16,20 @@ using namespace utils;
 
 TEST( test_option, test_option )
 {
-	Option<int> a;
+	Option<string> a;
 	EXPECT_EQ( a.has_value(), false );
-	a = 2;
+	a = "hello";
 	EXPECT_EQ( a.has_value(), true );
-	EXPECT_EQ( a.value(), 2 );
+	EXPECT_EQ( a.value(), "hello" );
+	auto b = a;
+	EXPECT_EQ( b.has_value(), true );
+	EXPECT_EQ( b.value(), "hello" );
+	EXPECT_EQ( a.has_value(), true );
+	EXPECT_EQ( a.value(), "hello" );
+	b = "world";
+	a = std::move( b );
+	EXPECT_EQ( a.has_value(), true );
+	EXPECT_EQ( a.value(), "world" );
 }
 
 TEST( test_option, test_option_nonnull )
