@@ -33,11 +33,6 @@ struct NonNull final
 	  _( new T( std::forward<Args>( args )... ) )
 	{
 	}
-	NonNull &operator=( nullptr_t )
-	{
-		_ = nullptr;
-		return *this;
-	}
 
 	T &operator*() const { return *_; }
 	T *operator->() const { return _; }
@@ -60,11 +55,6 @@ struct Box final
 	  _( new T( std::forward<Args>( args )... ) )
 	{
 	}
-	Box &operator=( nullptr_t )
-	{
-		_ = nullptr;
-		return *this;
-	}
 
 	T &operator*() const { return *_; }
 	T *operator->() const { return _; }
@@ -86,11 +76,6 @@ struct Arc final
 	explicit Arc( New, Args &&... args ) :
 	  _( new T( std::forward<Args>( args )... ) )
 	{
-	}
-	Arc &operator=( nullptr_t )
-	{
-		_ = nullptr;
-		return *this;
 	}
 
 	T &operator*() const { return *_; }

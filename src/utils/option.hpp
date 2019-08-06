@@ -32,7 +32,15 @@ struct Option final
 	Option( None ) noexcept :
 	  _( nullopt ) {}
 
-	template <typename U = T>
+	Option( Option const &other ) :
+	  _( other._ )
+	{
+	}
+	Option( Option &&other ) :
+	  _( std::move( other._ ) )
+	{
+	}
+	template <typename U = T, typename = typename enable_if<is_constructible<T, U>::value>::type>
 	Option( U &&value ) :
 	  _( std::forward<U>( value ) )
 	{
@@ -47,7 +55,17 @@ struct Option final
 		this->_ = std::in_place;
 		return *this;
 	}
-	template <typename U = T>
+	Option &operator=( Option const &other )
+	{
+		this->_ = other._;
+		return *this;
+	}
+	Option &operator=( Option &&other )
+	{
+		this->_ = std::move( other._ );
+		return *this;
+	}
+	template <typename U = T, typename = typename enable_if<is_constructible<T, U>::value>::type>
 	Option &operator=( U &&value )
 	{
 		this->_ = std::forward<U>( value );
@@ -163,7 +181,7 @@ private:
 		}                                                      \
 		Option &operator=( None )                              \
 		{                                                      \
-			this->_ = nullptr;                                 \
+			this->_._ = nullptr;                               \
 			return *this;                                      \
 		}                                                      \
 		template <typename U = Ptr<T>>                         \
