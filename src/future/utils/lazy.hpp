@@ -1,7 +1,7 @@
 #pragma once
 
 #include <future/future.hpp>
-#include <future/decorator/decorated.hpp>
+#include <future/ext/future_ext.hpp>
 #include <utils/option.hpp>
 #include <traits/function.hpp>
 
@@ -63,14 +63,14 @@ private:
 };
 
 template <typename F>
-Decorated<
+FutureExt<
   Lazy<
 	typename InvokeResultOf<F>::type>>
   lazy( F &&fn )
 {
 	using TaskFn = typename InferFunction<F>::type;
 	using R = typename InvokeResultOf<TaskFn>::type;
-	return Decorated<Lazy<R>>(
+	return FutureExt<Lazy<R>>(
 	  Lazy<R>( std::move( static_cast<TaskFn &&>( fn ) ) ) );
 }
 
