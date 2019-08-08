@@ -22,7 +22,7 @@ endif()
 add_subdirectory("${CMAKE_SOURCE_DIR}/third_party/googletest")
     
 add_executable(test_all ${test_sources})
-target_link_libraries(test_all gtest_main gtest pthread)
+target_link_libraries(test_all gtest_main gtest pthread uv)
 
 include(GoogleTest)
 gtest_add_tests(test_all "" AUTO)
