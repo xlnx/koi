@@ -16,7 +16,7 @@ using namespace traits::concepts;
 struct Bomb final : NoCopy, NoMove, NoHeap
 {
 	Bomb( function<void()> &&fn ) :
-	  fn( fn ) {}
+		fn( std::move( fn ) ) {}
 
 	~Bomb() { fn(); }
 

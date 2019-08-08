@@ -24,6 +24,7 @@ struct New final : NoHeap
 template <typename T>
 struct NonNull final
 {
+	NonNull() = default;
 	NonNull( T *_ ) :
 	  _( _ ) {}
 	NonNull( nullptr_t ) = delete;
@@ -37,8 +38,10 @@ struct NonNull final
 	T &operator*() const { return *_; }
 	T *operator->() const { return _; }
 
+	T *get() { return _; }
+
 private:
-	T *_;
+	T *_ = nullptr;
 	template <typename X>
 	friend struct Option;
 };
@@ -46,6 +49,7 @@ private:
 template <typename T>
 struct Box final
 {
+	Box() = default;
 	explicit Box( T *_ ) :
 	  _( _ ) {}
 	Box( nullptr_t ) = delete;
@@ -59,6 +63,8 @@ struct Box final
 	T &operator*() const { return *_; }
 	T *operator->() const { return &*_; }
 
+	T *get() { return _.get(); }
+
 private:
 	unique_ptr<T> _;
 	template <typename X>
@@ -68,6 +74,7 @@ private:
 template <typename T>
 struct Arc final
 {
+	Arc() = default;
 	explicit Arc( T *_ ) :
 	  _( _ ) {}
 	Arc( nullptr_t ) = delete;
@@ -80,6 +87,8 @@ struct Arc final
 
 	T &operator*() const { return *_; }
 	T *operator->() const { return &*_; }
+
+	T *get() { return _.get(); }
 
 private:
 	shared_ptr<T> _;
