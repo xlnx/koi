@@ -40,7 +40,8 @@ struct Option final
 	  _( std::move( other._ ) )
 	{
 	}
-	template <typename U = T, typename = typename enable_if<is_constructible<T, U>::value>::type>
+	template <typename U = T, typename = typename enable_if<
+								is_constructible<T, U>::value>::type>
 	Option( U &&value ) :
 	  _( std::forward<U>( value ) )
 	{
@@ -65,7 +66,8 @@ struct Option final
 		this->_ = std::move( other._ );
 		return *this;
 	}
-	template <typename U = T, typename = typename enable_if<is_constructible<T, U>::value>::type>
+	template <typename U = T, typename = typename enable_if<
+								is_constructible<T, U>::value>::type>
 	Option &operator=( U &&value )
 	{
 		this->_ = std::forward<U>( value );
@@ -101,7 +103,8 @@ struct Option final
 			reinterpret_cast<T &&>( other._ ) ) );
 	}
 
-	template <typename U = T, typename = typename enable_if<is_constructible<T, U>::value>::type>
+	template <typename U = T, typename = typename enable_if<
+								is_constructible<T, U>::value>::type>
 	Option( U &&value ) :
 	  has( true )
 	{
@@ -121,7 +124,8 @@ struct Option final
 		has = false;
 		return *this;
 	}
-	template <typename U = T, typename = typename enable_if<is_constructible<T, U>::value>::type>
+	template <typename U = T, typename = typename enable_if<
+								is_constructible<T, U>::value>::type>
 	Option &operator=( U &&value )
 	{
 		if ( has ) reinterpret_cast<T *>( &this->_ )->~T();
@@ -163,43 +167,43 @@ private:
 };
 #endif
 
-#define IMPL_OPTION_FOR_NONNULL_PTR( Ptr )                     \
-	template <typename T>                                      \
-	struct Option<Ptr<T>> final                                \
-	{                                                          \
-		Option() noexcept = default;                           \
-		Option( None ) noexcept : _( (T *)nullptr ) {}         \
-                                                               \
-		template <typename U = Ptr<T>>                         \
-		Option( U &&value ) : _( std::forward<U>( value ) )    \
-		{                                                      \
-		}                                                      \
-		template <typename... Args>                            \
-		explicit Option( New, Args &&... args ) :              \
-		  _( New{}, std::forward<Args>( args )... )            \
-		{                                                      \
-		}                                                      \
-		Option &operator=( None )                              \
-		{                                                      \
-			this->_._ = nullptr;                               \
-			return *this;                                      \
-		}                                                      \
-		template <typename U = Ptr<T>>                         \
-		Option &operator=( U &&value )                         \
-		{                                                      \
-			this->_ = std::forward<U>( value );                \
-			return *this;                                      \
-		}                                                      \
-                                                               \
-		T &operator*() const { return *_; }                    \
-		T *operator->() const { return _; }                    \
-                                                               \
-		bool has_value() const { return bool( _._ ); }         \
-		explicit operator bool() const { return has_value(); } \
-		Ptr<T> value() const { return _; }                     \
-                                                               \
-	private:                                                   \
-		Ptr<T> _;                                              \
+#define IMPL_OPTION_FOR_NONNULL_PTR( Ptr )                                     \
+	template <typename T>                                                      \
+	struct Option<Ptr<T>> final                                                \
+	{                                                                          \
+		Option() noexcept = default;                                           \
+		Option( None ) noexcept : _( ( typename Ptr<T>::Pointer ) nullptr ) {} \
+                                                                               \
+		template <typename U = Ptr<T>>                                         \
+		Option( U &&value ) : _( std::forward<U>( value ) )                    \
+		{                                                                      \
+		}                                                                      \
+		template <typename... Args>                                            \
+		explicit Option( New, Args &&... args ) :                              \
+		  _( New{}, std::forward<Args>( args )... )                            \
+		{                                                                      \
+		}                                                                      \
+		Option &operator=( None )                                              \
+		{                                                                      \
+			this->_._ = nullptr;                                               \
+			return *this;                                                      \
+		}                                                                      \
+		template <typename U = Ptr<T>>                                         \
+		Option &operator=( U &&value )                                         \
+		{                                                                      \
+			this->_ = std::forward<U>( value );                                \
+			return *this;                                                      \
+		}                                                                      \
+                                                                               \
+		typename Ptr<T>::Reference operator*() const { return *_; }            \
+		typename Ptr<T>::Pointer operator->() const { return _; }              \
+                                                                               \
+		bool has_value() const { return bool( _._ ); }                         \
+		explicit operator bool() const { return has_value(); }                 \
+		Ptr<T> value() const { return _; }                                     \
+                                                                               \
+	private:                                                                   \
+		Ptr<T> _;                                                              \
 	}
 
 IMPL_OPTION_FOR_NONNULL_PTR( NonNull );

@@ -23,7 +23,7 @@ struct Shared;
 template <typename F>
 struct Shared<F> : Future<typename F::Output>
 {
-	void poll() { _->poll(); }
+	bool poll() { return _->poll(); }
 
 	Shared( F &&_ ) :
 	  _( new F( std::move( _ ) ) )
@@ -40,11 +40,11 @@ struct Shared<
 	   !is_same<void, typename F::Output>::value,
 	   typename F::Output>::type> : Future<typename F::Output>
 {
-	void poll() { _->poll(); }
+	bool poll() { return _->poll(); }
 	typename F::Output
-	  poll_result() override
+	  get() override
 	{
-		this->_->poll();
+		return this->_->get();
 	}
 
 	Shared( F &&_ ) :

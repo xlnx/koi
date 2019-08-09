@@ -4,13 +4,13 @@
 #include <memory>
 #include <functional>
 
-#include <version.hpp>
-#include <traits/concepts.hpp>
-#include <traits/function.hpp>
-
 #ifdef KOI_CXX_GE_20
 #include <experimental/coroutine>
 #endif
+
+#include <version.hpp>
+#include <traits/concepts.hpp>
+#include <traits/function.hpp>
 
 namespace koi
 {
@@ -57,7 +57,7 @@ struct Future<> : Dynamic
 {
 	using Output = void;
 
-	virtual void poll() = 0;
+	virtual bool poll() = 0;
 #ifdef KOI_CXX_GE_20
 	template <typename P>
 	void await_suspend( coroutine_handle<P> _ ) const noexcept
@@ -88,11 +88,11 @@ struct Future : Future<>
 {
 	using Output = T;
 
-	virtual T poll_result() = 0;
+	virtual T get() = 0;
 #ifdef KOI_CXX_GE_20
 	T await_resume() noexcept
 	{
-		return this->poll_result();
+		return this->get();
 	}
 #endif
 

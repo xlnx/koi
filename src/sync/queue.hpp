@@ -5,7 +5,9 @@
 #include <atomic>
 #include <cstddef>
 #include <type_traits>
+
 #include <traits/concepts.hpp>
+#include <utils/nonnull.hpp>
 
 namespace koi
 {
@@ -17,6 +19,7 @@ namespace _
 {
 using namespace std;
 using namespace traits::concepts;
+using namespace utils;
 
 template <typename T>
 struct Node final : NoCopy, NoMove
@@ -84,7 +87,7 @@ struct Queue final : NoCopy
 		while ( cur != nullptr )
 		{
 			auto next = cur->next.load();
-			auto _ = unique_ptr<Node<T>>( cur );
+			auto _ = Box<Node<T>>( cur );
 			cur = next;
 		}
 	}
@@ -104,7 +107,7 @@ struct Queue final : NoCopy
 			auto next_ptr = next->next.load();
 			stub.next.store( next_ptr );
 			T ret( std::move( next->_ ) );
-			auto _ = unique_ptr<Node<T>>( next );
+			auto _ = Box<Node<T>>( next );
 			if ( next_ptr == nullptr )
 			{
 				head.store( reinterpret_cast<Node<T> *>( &stub ) );

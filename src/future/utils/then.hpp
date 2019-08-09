@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lazy.hpp"
 #include <future/future.hpp>
 #include <utils/option.hpp>
 
@@ -16,9 +17,9 @@ struct NextFnTy
 {
 	using type = function<R( O && )>;
 	template <typename F>
-	static R poll( F &a, type &fn )
+	static R gen( F &a, type &fn )
 	{
-		return fn( a.poll_result() );
+		return fn( a.get() );
 	}
 };
 template <typename R>
@@ -26,52 +27,43 @@ struct NextFnTy<R>
 {
 	using type = function<R()>;
 	template <typename F>
-	static R poll( F &a, type &fn )
+	static R gen( F &a, type &fn )
 	{
-		a.poll();
 		return fn();
 	}
 };
 
-template <typename F, typename R = void>
+template <typename F, typename R>
 struct NextFn
 {
 	using Ty = NextFnTy<R, typename F::Output>;
 	using type = typename Ty::type;
-	static R poll( F &a, type &fn ) { return Ty::poll( a, fn ); }
+	static R gen( F &a, type &fn ) { return Ty::gen( a, fn ); }
 };
 
-template <typename A, typename B = void>
+template <typename A, typename B, typename R = void>
 struct Then;
 
-template <typename A>
-struct Then<A> : Future<>
-{
-	using Second = typename NextFn<A>::type;
-
-	void poll() { NextFn<A>::poll( first, fn ); }
-
-	Then( A &&a, Second &&fn ) :
-	  first( std::move( a ) ),
-	  fn( std::move( fn ) )
-	{
-	}
-
-private:
-	A first;
-	Second fn;
-};
-
 template <typename A, typename B>
-struct Then : Future<B>
+struct Then<A, B> : Future<>
 {
 	using Second = typename NextFn<A, B>::type;
 
-	void poll() override { _ = NextFn<A, B>::poll( first, fn ); }
-	B poll_result() override
+	bool poll() override
 	{
-		this->poll();
-		return std::move( _.value() );
+		while ( true )
+		{
+			switch ( step )
+			{
+			case 0:
+				if ( !first.poll() ) return false;
+				break;
+			case 1: return second.value().poll();
+			default: throw 0;
+			}
+			second = NextFn<A, B>::gen( first, fn );
+			++step;
+		}
 	}
 
 	Then( A &&a, Second &&fn ) :
@@ -82,8 +74,46 @@ struct Then : Future<B>
 
 private:
 	A first;
+	Option<B> second;
 	Second fn;
-	Option<B> _;
+	int step = 0;
+};
+
+// A: Future<_>, B: Future<R>
+template <typename A, typename B, typename R>
+struct Then : Future<R>
+{
+	using Second = typename NextFn<A, B>::type;
+
+	bool poll() override
+	{
+		while ( true )
+		{
+			switch ( step )
+			{
+			case 0:
+				if ( !first.poll() ) return false;
+				break;
+			case 1: return second.value().poll();
+			default: throw 0;
+			}
+			second = NextFn<A, B>::gen( first, fn );
+			++step;
+		}
+	}
+	R get() override { return second.value().get(); }
+
+	Then( A &&a, Second &&fn ) :
+	  first( std::move( a ) ),
+	  fn( std::move( fn ) )
+	{
+	}
+
+private:
+	A first;
+	Option<B> second;
+	Second fn;
+	int step = 0;
 };
 
 }  // namespace _

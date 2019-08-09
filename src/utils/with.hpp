@@ -18,7 +18,7 @@ using namespace traits::concepts;
 template <typename T>
 struct With final : NoCopy, NoMove, NoHeap
 {
-	void with( T &_, function<void()> const &fn )
+	void with( typename NonNull<T>::Reference _, function<void()> const &fn )
 	{
 		auto old = this->_.value();
 		Bomb x( [this, old] { this->_ = old; } );
@@ -26,8 +26,8 @@ struct With final : NoCopy, NoMove, NoHeap
 		fn();
 	}
 
-	T &operator*() const { return *_; }
-	T *operator->() const { return &*_; }
+	typename NonNull<T>::Reference operator*() const { return *_; }
+	typename NonNull<T>::Pointer operator->() const { return &*_; }
 
 private:
 	Option<NonNull<T>> _;

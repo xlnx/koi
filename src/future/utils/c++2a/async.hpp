@@ -61,6 +61,7 @@ struct Async final : Future<T>, AsyncBase<Promise<Async<T>, T>>
 		this->_.resume();
 		return std::move( this->_.promise().value() );
 	}
+	void await_resume() noexcept { return this->resume(); }
 
 private:
 	using AsyncBase<Promise<Async, T>>::AsyncBase;

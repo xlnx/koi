@@ -17,11 +17,14 @@ namespace _
 using namespace std;
 using namespace traits;
 
-template <typename A, typename F>
+template <typename A, typename B, typename R>
 struct Then;
 
 template <typename F, typename O>
 struct Shared;
+
+template <typename T>
+struct Lazy;
 
 }  // namespace _
 
@@ -41,8 +44,11 @@ struct FutureExt final : Self
 	FutureExt<
 	  Then<
 		FutureExt<Self>,
+		FutureExt<
+		  Lazy<typename InvokeResultOf<F>::type>>,
 		typename InvokeResultOf<F>::type>>
 	  then( F &&fn ) &&;
+	// need impl then_async
 
 	FutureExt<
 	  Shared<

@@ -24,9 +24,9 @@ TEST( test_steal_worker, test_worker_lifo )
 	worker.emplace( 1 );
 	worker.emplace( 2 );
 	worker.emplace( 3 );
-	EXPECT_EQ( stealer.steal(), 1 );
-	EXPECT_EQ( worker.pop(), 3 );
-	EXPECT_EQ( worker.pop(), 2 );
+	ASSERT_EQ( stealer.steal(), 1 );
+	ASSERT_EQ( worker.pop(), 3 );
+	ASSERT_EQ( worker.pop(), 2 );
 }
 
 TEST( test_steal_worker, test_worker_fifo )
@@ -36,7 +36,7 @@ TEST( test_steal_worker, test_worker_fifo )
 	worker.emplace( 1 );
 	worker.emplace( 2 );
 	worker.emplace( 3 );
-	EXPECT_EQ( stealer.steal(), 1 );
-	EXPECT_EQ( worker.pop(), 2 );
-	EXPECT_EQ( worker.pop(), 3 );
+	ASSERT_EQ( stealer.steal(), 1 );
+	ASSERT_EQ( worker.pop(), 2 );
+	ASSERT_EQ( worker.pop(), 3 );
 }

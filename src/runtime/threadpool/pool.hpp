@@ -6,6 +6,7 @@
 #include <future/future.hpp>
 #include <steal/deque.hpp>
 #include <traits/concepts.hpp>
+#include <utils/nonnull.hpp>
 // #include <executor/executor.hpp>
 
 namespace koi
@@ -20,6 +21,7 @@ using namespace std;
 // using namespace executor;
 using namespace steal;
 using namespace traits::concepts;
+using namespace utils;
 
 enum State
 {
@@ -34,12 +36,12 @@ enum State
 struct Task
 {
 	atomic<State> state;
-	unique_ptr<Future<>> future;
+	Box<Future<>> future;
 };
 
 struct Pool final : NoCopy, NoMove
 {
-	void spawn( unique_ptr<Future<>> &&future )
+	void spawn( Box<Future<>> &&future )
 	{
 	}
 

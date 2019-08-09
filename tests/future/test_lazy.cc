@@ -25,5 +25,5 @@ TEST( test_lazy, test_lazy )
 		a.emplace_back( 1 );
 		a.emplace_back( 2 );
 	} ) );
-	EXPECT_EQ( a, ( decltype( a ){ 1, 2 } ) );
+	ASSERT_EQ( a, ( decltype( a ){ 1, 2 } ) );
 }

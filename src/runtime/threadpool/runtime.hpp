@@ -44,7 +44,7 @@ struct Runtime final NoCopy
 
 	private:
 		friend struct Runtime;
-		unique_ptr<Pool> pool;
+		Box<Pool> pool;
 	};
 
 	template <typename F>
@@ -61,7 +61,7 @@ struct Runtime final NoCopy
 	void spawn( F &&future )
 	{
 		using FutTy = typename decay<F>::type;
-		this->executor.spawn( unique_ptr<FutTy>(
+		this->executor.spawn( Box<FutTy>(
 		  new FutTy( std::forward<F>( future ) ) ) );
 	}
 

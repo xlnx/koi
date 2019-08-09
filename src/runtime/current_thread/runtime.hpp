@@ -3,10 +3,12 @@
 #include <memory>
 #include <utility>
 
+#include <reactor/reactor.hpp>
 #include <sync/queue.hpp>
 #include <future/future.hpp>
 #include <executor/executor.hpp>
 #include <traits/concepts.hpp>
+#include <utils/nonnull.hpp>
 
 namespace koi
 {
@@ -17,8 +19,55 @@ namespace current_thread
 namespace _
 {
 using namespace std;
+using namespace chrono;
 using namespace traits::concepts;
 using namespace future;
+using namespace reactor;
+using namespace koi::utils;
+using namespace sync;
+
+struct Runtime;
+
+struct Inner
+{
+	mpsc::Queue<Box<Future<>>> tasks;
+};
+
+struct Scheduler
+{
+	void schedule( Box<Future<>> &&future )
+	{
+		_->tasks.emplace( std::move( future ) );
+	}
+
+	//private:
+	Arc<Inner> _ = Arc<Inner>( new Inner );
+};
+
+struct Executor final : executor::Executor
+{
+	Executor() = default;
+
+	void spawn( Box<Future<>> &&future ) override
+	{
+		scheduler._->tasks.emplace( std::move( future ) );
+		scheduler.schedule( std::move( future ) );
+	}
+	void run( nanoseconds const *timeout = nullptr )
+	{
+		if ( reactor.idle() ) return;
+		while ( true )
+		{
+			reactor.poll();
+			if ( reactor.idle() ) return;
+		}
+	}
+
+private:
+	Scheduler scheduler;
+	Reactor reactor;
+	friend struct Runtime;
+};
 
 struct Runtime final : NoCopy
 {
@@ -30,36 +79,25 @@ struct Runtime final : NoCopy
 		friend struct Runtime;
 	};
 
-	struct Executor final : executor::Executor
-	{
-		void spawn( unique_ptr<Future<>> &&future ) override
-		{
-			tasks.emplace( std::move( future ) );
-		}
-
-	private:
-		sync::mpsc::Queue<unique_ptr<Future<>>> tasks;
-		friend struct Runtime;
-	};
-
 	Runtime() = default;
 
 	template <typename F>
 	void run( F &&future )
 	{
 		this->spawn( std::forward<F>( future ) );
-		while ( !this->executor.tasks.empty() )
-		{
-			auto front = this->executor.tasks.pop();
-			front->poll();
-		}
+		this->executor.run();
+		// while ( !this->executor.tasks.empty() )
+		// {
+		// 	auto front = this->executor.tasks.pop();
+		// 	front->poll();
+		// }
 	}
 
 	template <typename F>
 	void spawn( F &&future )
 	{
 		using FutTy = typename decay<F>::type;
-		this->executor.spawn( unique_ptr<FutTy>(
+		this->executor.spawn( Box<Future<>>(
 		  new FutTy( std::forward<F>( future ) ) ) );
 	}
 

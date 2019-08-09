@@ -30,7 +30,7 @@ Async<string> h()
 	LOG_CHECKPOINT();
 	auto x = co_await g();
 	LOG_CHECKPOINT();
-	EXPECT_EQ( x, "g" );
+	ASSERT_EQ( x, "g" );
 	co_return "h";
 }
 

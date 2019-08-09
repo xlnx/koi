@@ -27,5 +27,5 @@ TEST( test_shared, test_shared )
 				 .shared();
 	decltype( job ) _( job );
 	koi::run( job );
-	EXPECT_EQ( a, ( decltype( a ){ 1 } ) );
+	ASSERT_EQ( a, ( decltype( a ){ 1 } ) );
 }

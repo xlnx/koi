@@ -20,13 +20,13 @@ TEST( test_slab, test_slab )
 	auto qwert = slab.emplace( "qwert" );
 	auto asd = slab.emplace( "asd" );
 	auto zxcv = slab.emplace( "zxcv" );
-	EXPECT_EQ( slab.remove( qwert ), "qwert" );
+	ASSERT_EQ( slab.remove( qwert ), "qwert" );
 	auto qaz = slab.emplace( "qaz" );
-	EXPECT_EQ( slab.remove( asd ), "asd" );
+	ASSERT_EQ( slab.remove( asd ), "asd" );
 	auto xxxx = slab.emplace( "xxxx" );
-	EXPECT_EQ( slab.remove( zxcv ), "zxcv" );
+	ASSERT_EQ( slab.remove( zxcv ), "zxcv" );
 	auto www = slab.emplace( "www" );
-	EXPECT_EQ( slab.remove( xxxx ), "xxxx" );
-	EXPECT_EQ( slab.remove( www ), "www" );
-	EXPECT_EQ( slab.remove( qaz ), "qaz" );
+	ASSERT_EQ( slab.remove( xxxx ), "xxxx" );
+	ASSERT_EQ( slab.remove( www ), "www" );
+	ASSERT_EQ( slab.remove( qaz ), "qaz" );
 }

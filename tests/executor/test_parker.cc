@@ -27,5 +27,5 @@ TEST( test_parker, park_thread )
 	ckpt.emplace_back( 2 );
 	unpark->unpark();
 	t1.join();
-	EXPECT_EQ( ckpt, ( vector<int>{ 0, 2, 1 } ) );
+	ASSERT_EQ( ckpt, ( vector<int>{ 0, 2, 1 } ) );
 }

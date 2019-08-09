@@ -18,33 +18,33 @@ TEST( test_queue, mpsc_queue )
 {
 	using namespace mpsc;
 	Queue<string> q;
-	EXPECT_EQ( q.empty(), true );
+	ASSERT_EQ( q.empty(), true );
 	q.emplace( "1" );
 	q.emplace( "2" );
 	q.emplace( "3" );
-	EXPECT_EQ( q.empty(), false );
-	EXPECT_EQ( q.pop(), "1" );
-	EXPECT_EQ( q.pop(), "2" );
-	EXPECT_EQ( q.pop(), "3" );
-	EXPECT_EQ( q.empty(), true );
+	ASSERT_EQ( q.empty(), false );
+	ASSERT_EQ( q.pop(), "1" );
+	ASSERT_EQ( q.pop(), "2" );
+	ASSERT_EQ( q.pop(), "3" );
+	ASSERT_EQ( q.empty(), true );
 }
 
 TEST( test_queue, mpsc_queue_no_copy )
 {
 	using namespace mpsc;
 	Queue<unique_ptr<string>> q;
-	EXPECT_EQ( q.empty(), true );
+	ASSERT_EQ( q.empty(), true );
 	q.emplace( unique_ptr<string>( new string( "hello" ) ) );
 	q.emplace( unique_ptr<string>( new string( "world" ) ) );
 	decltype( q ) p;
 	p = std::move( q );
 	p.emplace( unique_ptr<string>( new string( "!" ) ) );
-	EXPECT_EQ( p.empty(), false );
-	EXPECT_EQ( *p.pop(), "hello" );
-	EXPECT_EQ( *p.pop(), "world" );
+	ASSERT_EQ( p.empty(), false );
+	ASSERT_EQ( *p.pop(), "hello" );
+	ASSERT_EQ( *p.pop(), "world" );
 	decltype( q ) r( std::move( p ) );
-	EXPECT_EQ( *r.pop(), "!" );
-	EXPECT_EQ( r.empty(), true );
+	ASSERT_EQ( *r.pop(), "!" );
+	ASSERT_EQ( r.empty(), true );
 }
 
 TEST( test_queue, mpsc_queue_threads )
@@ -87,11 +87,11 @@ TEST( test_queue, mpsc_queue_threads )
 		res.emplace_back( q.pop() );
 	}
 
-	EXPECT_EQ( q.empty(), true );
+	ASSERT_EQ( q.empty(), true );
 
 	sort( res.begin() + 0, res.begin() + 4 );
 	sort( res.begin() + 4, res.begin() + 8 );
 	sort( res.begin() + 8, res.begin() + 12 );
 
-	EXPECT_EQ( res, ( vector<int>{ 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3 } ) );
+	ASSERT_EQ( res, ( vector<int>{ 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3 } ) );
 }

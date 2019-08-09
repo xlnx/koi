@@ -25,6 +25,6 @@ TEST( test_mutex, mutex_normal )
 
 	{
 		auto str_lk = str.lock();
-		EXPECT_EQ( *str_lk, "mutex" );
+		ASSERT_EQ( *str_lk, "mutex" );
 	}
 }

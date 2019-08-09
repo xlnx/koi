@@ -39,7 +39,7 @@ struct UnparkPtr final : Unpark, NoCopy
 	void clear() const { _.reset( nullptr ); }
 
 private:
-	mutable unique_ptr<Unpark> _;
+	mutable Box<Unpark> _;
 };
 
 struct ParkPtr final : Park<UnparkPtr>, NoCopy
@@ -62,7 +62,7 @@ struct ParkPtr final : Park<UnparkPtr>, NoCopy
 	void clear() const { _.reset( nullptr ); }
 
 private:
-	mutable unique_ptr<Park> _;
+	mutable Box<Park> _;
 };
 
 }  // namespace _

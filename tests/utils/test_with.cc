@@ -20,6 +20,6 @@ TEST( test_with, test_with )
 {
 	int a = 10;
 	state.with( a, [] {
-		EXPECT_EQ( *state, 10 );
+		ASSERT_EQ( *state, 10 );
 	} );
 }

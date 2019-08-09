@@ -28,7 +28,11 @@ struct Lazy;
 template <>
 struct Lazy<> : Future<>
 {
-	void poll() { fn(); }
+	bool poll()
+	{
+		fn();
+		return true;
+	}
 
 	Lazy( function<void()> &&fn ) :
 	  fn( std::move( fn ) )
@@ -42,10 +46,13 @@ private:
 template <typename R>
 struct Lazy : Future<R>
 {
-	void poll() override { _ = fn(); }
-	R poll_result() override
+	bool poll() override
 	{
-		this->poll();
+		_ = fn();
+		return true;
+	}
+	R get() override
+	{
 		return std::move( _.value() );
 	}
 

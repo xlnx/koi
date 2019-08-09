@@ -24,8 +24,10 @@ struct New final : NoHeap
 template <typename T>
 struct NonNull final
 {
-	NonNull() = default;
-	NonNull( T *_ ) :
+	using Reference = T const &;
+	using Pointer = T const *;
+
+	NonNull( Pointer _ ) :
 	  _( _ ) {}
 	NonNull( nullptr_t ) = delete;
 
@@ -35,13 +37,16 @@ struct NonNull final
 	{
 	}
 
-	T &operator*() const { return *_; }
-	T *operator->() const { return _; }
+	Reference operator*() const { return *_; }
+	Pointer operator->() const { return _; }
 
-	T *get() { return _; }
+	Pointer get() const { return _; }
 
 private:
-	T *_ = nullptr;
+	NonNull() = default;
+
+private:
+	Pointer _ = nullptr;
 	template <typename X>
 	friend struct Option;
 };
@@ -49,8 +54,10 @@ private:
 template <typename T>
 struct Box final
 {
-	Box() = default;
-	explicit Box( T *_ ) :
+	using Reference = T &;
+	using Pointer = T *;
+
+	explicit Box( Pointer _ ) :
 	  _( _ ) {}
 	Box( nullptr_t ) = delete;
 
@@ -60,10 +67,13 @@ struct Box final
 	{
 	}
 
-	T &operator*() const { return *_; }
-	T *operator->() const { return &*_; }
+	Reference operator*() const { return *_; }
+	Pointer operator->() const { return &*_; }
 
-	T *get() { return _.get(); }
+	Pointer get() const { return _.get(); }
+
+private:
+	Box() = default;
 
 private:
 	unique_ptr<T> _;
@@ -74,8 +84,10 @@ private:
 template <typename T>
 struct Arc final
 {
-	Arc() = default;
-	explicit Arc( T *_ ) :
+	using Reference = T &;
+	using Pointer = T *;
+
+	explicit Arc( Pointer _ ) :
 	  _( _ ) {}
 	Arc( nullptr_t ) = delete;
 
@@ -85,10 +97,13 @@ struct Arc final
 	{
 	}
 
-	T &operator*() const { return *_; }
-	T *operator->() const { return &*_; }
+	Reference operator*() const { return *_; }
+	Pointer operator->() const { return &*_; }
 
-	T *get() { return _.get(); }
+	Pointer get() const { return _.get(); }
+
+private:
+	Arc() = default;
 
 private:
 	shared_ptr<T> _;

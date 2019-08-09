@@ -33,5 +33,5 @@ TEST( test_then, test_then )
 					 a.emplace_back( b );
 				 } );
 	koi::run( std::move( job ) );
-	EXPECT_EQ( a, ( decltype( a ){ 1, 2, 3 } ) );
+	ASSERT_EQ( a, ( decltype( a ){ 1, 2, 3 } ) );
 }
