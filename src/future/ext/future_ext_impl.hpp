@@ -66,7 +66,7 @@ FutureExt<
   FutureExt<Self>::shared() &&
 {
 	return Shared<
-	  FutureExt<Self>>(
+	  FutureExt<Self>, typename Self::Output>(
 	  std::move( *this ) );
 }
 

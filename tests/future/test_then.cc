@@ -10,9 +10,6 @@
 
 #include <koi.hpp>
 
-#define DEBUG
-#include <future/log.hpp>
-
 using namespace std;
 using namespace chrono;
 
@@ -31,7 +28,9 @@ TEST( test_then, test_then )
 				 } )
 				 .then( [&]( int b ) {
 					 a.emplace_back( b );
+					 return string( "test then" );
 				 } );
-	koi::run( std::move( job ) );
+	ASSERT_EQ( job.poll(), true );
+	ASSERT_EQ( job.get(), "test then" );
 	ASSERT_EQ( a, ( decltype( a ){ 1, 2, 3 } ) );
 }
