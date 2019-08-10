@@ -58,24 +58,18 @@ struct Queue final : NoCopy
 	}
 	Queue( Queue &&other )
 	{
-		if ( !other.empty() )
-		{
+		if ( !other.empty() ) {
 			swap_rvalue_non_empty( std::forward<Queue>( other ) );
-		}
-		else
-		{
+		} else {
 			head.store( reinterpret_cast<Node<T> *>( &stub ) );
 		}
 	}
 	Queue &operator=( Queue &&other )
 	{
 		this->~Queue();
-		if ( !other.empty() )
-		{
+		if ( !other.empty() ) {
 			swap_rvalue_non_empty( std::forward<Queue>( other ) );
-		}
-		else
-		{
+		} else {
 			head.store( reinterpret_cast<Node<T> *>( &stub ) );
 			stub.next.store( nullptr );
 		}
@@ -84,8 +78,7 @@ struct Queue final : NoCopy
 	~Queue()
 	{
 		auto cur = stub.next.load();
-		while ( cur != nullptr )
-		{
+		while ( cur != nullptr ) {
 			auto next = cur->next.load();
 			auto _ = Box<Node<T>>( cur );
 			cur = next;
@@ -102,14 +95,12 @@ struct Queue final : NoCopy
 	T pop()
 	{
 		auto next = stub.next.load();
-		if ( next != nullptr )
-		{
+		if ( next != nullptr ) {
 			auto next_ptr = next->next.load();
 			stub.next.store( next_ptr );
 			T ret( std::move( next->_ ) );
 			auto _ = Box<Node<T>>( next );
-			if ( next_ptr == nullptr )
-			{
+			if ( next_ptr == nullptr ) {
 				head.store( reinterpret_cast<Node<T> *>( &stub ) );
 			}
 			return ret;

@@ -18,8 +18,8 @@ Futures can be chained using various **combinators**.
 
 Currently implemented combinators:
 
-* Future<R1>.then(Fn(R1)->R2) => Future<R2>
-* Future<R1>.shared() => SharedFuture<R1>
+* `Future<R1>.then(Fn(R1)->R2) => Future<R2>`
+* `Future<R1>.shared() => SharedFuture<R1>`
 
 ## First Async Shot
 

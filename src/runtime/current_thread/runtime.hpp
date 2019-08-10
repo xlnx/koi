@@ -43,14 +43,10 @@ struct Scheduler
 	void tick()
 	{
 		auto &tasks = _->tasks;
-		for ( auto itr = tasks.begin(); itr != tasks.end(); )
-		{
-			if ( ( *itr )->poll() )
-			{
+		for ( auto itr = tasks.begin(); itr != tasks.end(); ) {
+			if ( ( *itr )->poll() ) {
 				itr = tasks.erase( itr );
-			}
-			else
-			{
+			} else {
 				++itr;
 			}
 		}
@@ -72,8 +68,7 @@ struct Executor final : executor::Executor
 	void run( nanoseconds const *timeout = nullptr )
 	{
 		reactor.with( [=] {
-			while ( true )
-			{
+			while ( true ) {
 				scheduler.tick();
 				if ( reactor.idle() ) return;
 				reactor.poll();

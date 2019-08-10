@@ -25,26 +25,39 @@ struct File
 						  uv::into_poll<uv_fs_t> );
 		  } );
 		return poll_fn<File>(
-		  [step = 0,
+		  [ok = false,
 		   evt = std::move( evt )]( Option<File> &_ ) mutable -> bool {
-			  while ( true )
-			  {
-				  switch ( step )
-				  {
-				  case 0: uv::Poll::current()->reg( evt, 0 ); break;
-				  case 1:
-					  if ( evt.ready() )
-					  {
-						  _ = File{};
-						  return true;
-					  }
-					  return false;
-				  default: throw 0;
-				  }
-				  ++step;
+			  if ( !ok ) {
+				  uv::Poll::current()->reg( evt, 0 );
+				  ok = true;
+			  } else if ( evt.ready() ) {
+				  _ = File{};
+				  return true;
 			  }
+			  return false;
 		  } );
 	}
+	auto read()
+	{
+		auto evt = uv::request<uv_fs_t>(
+		  [=]( uv_loop_t *selector, auto *request ) {
+			  uv_fs_read( selector, request->handle(), _, bufs, nbufs, off,
+						  uv::into_poll<uv_fs_t> );
+		  } );
+		return poll_fn<void>(
+		  [ok = false,
+		   evt = std::move( evt )]( None &_ ) mutable -> bool {
+			  if ( !ok ) {
+				  uv::Poll::current()->reg( evt, 0 );
+				  ok = true;
+			  } else {
+			  }
+			  return false;
+		  } );
+	}
+
+private:
+	uv_file _;
 };
 
 }  // namespace _

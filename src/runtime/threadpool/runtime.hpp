@@ -51,8 +51,7 @@ struct Runtime final NoCopy
 	void run( F &&future )
 	{
 		this->spawn( std::forward<F>( future ) );
-		while ( !this->executor.tasks.empty() )
-		{
+		while ( !this->executor.tasks.empty() ) {
 			//
 		}
 	}

@@ -77,5 +77,4 @@ using _::Async;
 
 }  // namespace koi::future::utils
 
-KOI_FUTURE_STD_HOOK_T(:
-  : koio::future::utils::Async )
+KOI_FUTURE_STD_HOOK_T(::koi::future::utils::Async )

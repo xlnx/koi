@@ -52,8 +52,7 @@ struct Worker final : NoCopy
 
 	T pop()
 	{
-		switch ( flavor )
-		{
+		switch ( flavor ) {
 		case Lifo:
 			return _->pop_back();
 		case Fifo:

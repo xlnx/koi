@@ -42,22 +42,18 @@ public:
 	{
 		auto observed = NOTIFIED;
 
-		if ( state.compare_exchange_strong( observed, EMPTY ) )
-		{
+		if ( state.compare_exchange_strong( observed, EMPTY ) ) {
 			return;
 		}
-		if ( timeout && timeout->count() == 0 )
-		{
+		if ( timeout && timeout->count() == 0 ) {
 			return;
 		}
 
 		std::unique_lock<std::mutex> _( this->_ );
 
 		observed = EMPTY;
-		if ( !state.compare_exchange_strong( observed, PARKED ) )
-		{
-			if ( observed == NOTIFIED )
-			{
+		if ( !state.compare_exchange_strong( observed, PARKED ) ) {
+			if ( observed == NOTIFIED ) {
 				auto old = state.exchange( EMPTY );
 				assert( old == NOTIFIED && "park state changed unexpectedly" );
 				return;
@@ -65,16 +61,12 @@ public:
 			assert( false && "inconsistent park_timeout state" );
 		}
 
-		if ( timeout )
-		{
+		if ( timeout ) {
 			cv.wait_for( _, *timeout );
-			if ( state.exchange( EMPTY ) == EMPTY )
-			{
+			if ( state.exchange( EMPTY ) == EMPTY ) {
 				assert( false && "inconsistent park_timeout state" );
 			}
-		}
-		else
-		{
+		} else {
 			cv.wait( _, [&] {
 				observed = NOTIFIED;
 				return state.compare_exchange_strong( observed, EMPTY );
@@ -84,8 +76,7 @@ public:
 
 	void unpark() const
 	{
-		if ( state.exchange( NOTIFIED ) == PARKED )
-		{
+		if ( state.exchange( NOTIFIED ) == PARKED ) {
 			// drop(self.lock.lock().unwrap())
 			cv.notify_one();
 		}

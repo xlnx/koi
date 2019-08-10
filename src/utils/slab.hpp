@@ -51,19 +51,14 @@ struct Slab final : ExplicitCopy
 	Index emplace( Args &&... args )
 	{
 		Index idx;
-		if ( next == Null() )
-		{
-			if ( len == _.size() )
-			{
+		if ( next == Null() ) {
+			if ( len == _.size() ) {
 				decltype( _ ) __( _.size() * 2 );
-				for ( auto idx = next; idx != Null(); idx = _[ idx ].next )
-				{
+				for ( auto idx = next; idx != Null(); idx = _[ idx ].next ) {
 					__[ idx ].next = _[ idx ].next;
 				}
-				for ( auto idx = 0; idx != _.size(); ++idx )
-				{
-					if ( __[ idx ].next == Empty() )
-					{
+				for ( auto idx = 0; idx != _.size(); ++idx ) {
+					if ( __[ idx ].next == Empty() ) {
 						auto &dst = reinterpret_cast<T &>( __[ idx ].value );
 						auto &src = reinterpret_cast<T &>( _[ idx ].value );
 						new ( &dst ) T( std::move( src ) );
@@ -73,9 +68,7 @@ struct Slab final : ExplicitCopy
 				__.swap( _ );
 			}
 			idx = len++;
-		}
-		else
-		{
+		} else {
 			next = _[ idx = next ].next;
 		}
 		new ( &_[ idx ] ) T( std::forward<Args>( args )... );

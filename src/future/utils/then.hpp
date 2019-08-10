@@ -21,8 +21,7 @@ auto then( A &&self, F &&fn )
 	auto first = poll_fn<B>(
 	  [self = std::forward<A>( self ),
 	   fn = std::forward<F>( fn )]( PollOut<B> &_ ) mutable -> bool {
-		  if ( self.poll() )
-		  {
+		  if ( self.poll() ) {
 			  _ = invoke( fn, self.get() );
 			  return true;
 		  }
@@ -33,16 +32,13 @@ auto then( A &&self, F &&fn )
 	  [step = 0,
 	   first = std::move( first ),
 	   second = Option<B>()]( PollOut<Output> &_ ) mutable -> bool {
-		  while ( true )
-		  {
-			  switch ( step )
-			  {
+		  while ( true ) {
+			  switch ( step ) {
 			  case 0:
 				  if ( !first.poll() ) return false;
 				  break;
 			  case 1:
-				  if ( second.value().poll() )
-				  {
+				  if ( second.value().poll() ) {
 					  _ = submit( second.value() );
 					  return true;
 				  }

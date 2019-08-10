@@ -19,7 +19,6 @@ struct Stream : Dynamic
 
 	virtual void poll_next() = 0;
 	virtual Option<T> poll_next_result() = 0;
-	
 };
 
 }  // namespace _

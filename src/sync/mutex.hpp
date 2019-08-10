@@ -33,8 +33,7 @@ struct MutexGuard final : NoCopy, NoHeap
 	}
 	~MutexGuard()
 	{
-		if ( _ )
-		{
+		if ( _ ) {
 			_->lk.unlock();
 		}
 	}

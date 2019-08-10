@@ -36,7 +36,6 @@ namespace _
 {
 template <typename F, typename O>
 struct Shared;
-
 }
 
 }  // namespace utils

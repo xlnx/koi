@@ -24,7 +24,7 @@ struct None
 {
 };
 
-#ifdef KOI_CXX_GE_17
+#if 0  //KOI_CXX_GE_17
 template <typename T>
 struct Option final
 {
