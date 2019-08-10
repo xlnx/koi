@@ -27,6 +27,17 @@ auto FutureExt<Self>::then( F &&fn ) &&
 }
 
 template <typename Self>
+template <typename F>
+auto FutureExt<Self>::then_fut( F &&fut ) &&
+{
+	// using Then = typename InvokeResultOf<F>::type;
+	// using Output = typename Then::Output;
+	return _::then(
+	  std::move( *this ),
+	  std::move( fut ) );
+}
+
+template <typename Self>
 FutureExt<
   Shared<
 	FutureExt<Self>, typename Self::Output>>

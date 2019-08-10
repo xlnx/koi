@@ -36,7 +36,9 @@ struct FutureExt : Self
 
 	template <typename F>
 	auto then( F &&fn ) &&;
-	// need impl then_async
+
+	template <typename F>
+	auto then_fut( F &&fut ) &&;
 
 	FutureExt<
 	  Shared<

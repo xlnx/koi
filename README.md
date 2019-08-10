@@ -24,6 +24,7 @@ Currently implemented combinators:
 ## First Async Shot
 
 ```cpp
+/*0123456789*/
 #include <iostream>
 #include <vector>
 #include <gtest/gtest.h>
@@ -36,18 +37,36 @@ using namespace koi;
 
 TEST( test_poll, test_poll )
 {
-	vector<int> _;
-	auto open_file =
-	  fs::File::open( "/usr/bin/bash" )
-		.then( [&]( fs::File file ) {
-			_.emplace_back( 1 );
-		} );
-
 	Runtime rt;
+	vector<int> _;
+	char buf[ 15 ] = { 0 };
+	auto open_file =
+	  fs::File::open( "../tests/uv/test_poll.cc" )
+		.then( [&]( fs::File file ) {
+			rt.spawn(
+			  file.read( buf, sizeof( buf ) - 1 )
+				.then( [&]( ssize_t ret ) {
+					if ( ret < 0 ) {
+						cerr << uv_strerror( ret ) << endl;
+					} else {
+						_.emplace_back( ret );
+					}
+					return 1;
+				} )
+				// .then_fut here spawns an error
+				.then( [&, file]( int ) {
+					rt.spawn(
+					  // open with readonly mode
+					  file.write( buf, 5 )
+						.then( [&]( ssize_t ret ) {
+							_.emplace_back( ret );
+						} ) );
+				} ) );
+		} );
 	rt.run( std::move( open_file ) );
-	ASSERT_EQ( _, ( vector<int>{ 1 } ) );
+	ASSERT_EQ( _, ( vector<int>{ 14, -9 } ) );
+	ASSERT_STREQ( buf, "/*0123456789*/" );
 }
-
 ```
 
 ## Using C++20

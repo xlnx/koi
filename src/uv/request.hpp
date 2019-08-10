@@ -72,8 +72,16 @@ Request<T, F> request( F &&fn )
 	return Request<T, F>( std::forward<F>( fn ) );
 }
 
+template <typename T>
+T *block_request()
+{
+	thread_local T _;
+	return &_;
+}
+
 }  // namespace _
 
+using _::block_request;
 using _::into_poll;
 using _::request;
 
