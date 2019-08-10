@@ -23,13 +23,13 @@ using namespace sync;
 struct Inner
 {
 	void wakeup() {}
-	size_t add_source(uv::Evented const &source)
+	size_t add_source( uv::Evented const &source )
 	{
 		size_t key = 1;
-		poll.reg(source, key);
+		poll.reg( source, key );
 		return key;
 	}
-	
+
 	mpsc::Queue<Box<Future<>>> tasks;
 	// Slab<> io_dispatch;
 	uv::Poll poll;
@@ -55,11 +55,8 @@ struct Reactor final : Park<Handle>
 	void park( nanoseconds const &timeout ) override { this->poll( &timeout ); }
 
 	bool idle() const { return _->poll.idle(); }
-	void poll( nanoseconds const *timeout = nullptr )
-	{
-		// this->_->poll.poll();
-	}
-	
+	void with( function<void()> const &fn ) { uv::Poll::current().with( this->_->poll, fn ); }
+	void poll( nanoseconds const *timeout = nullptr ) { this->_->poll.poll( events ); }
 
 private:
 	Arc<Inner> _ = Arc<Inner>( new Inner );

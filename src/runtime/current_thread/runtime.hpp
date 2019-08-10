@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <utility>
+#include <list>
 
 #include <reactor/reactor.hpp>
 #include <sync/queue.hpp>
@@ -30,14 +31,29 @@ struct Runtime;
 
 struct Inner
 {
-	mpsc::Queue<Box<Future<>>> tasks;
+	list<Box<Future<>>> tasks;
 };
 
 struct Scheduler
 {
 	void schedule( Box<Future<>> &&future )
 	{
-		_->tasks.emplace( std::move( future ) );
+		// _->tasks.emplace_back( std::move( future ) );
+	}
+	void tick()
+	{
+		auto &tasks = _->tasks;
+		for ( auto itr = tasks.begin(); itr != tasks.end(); )
+		{
+			if ( ( *itr )->poll() )
+			{
+				itr = tasks.erase( itr );
+			}
+			else
+			{
+				++itr;
+			}
+		}
 	}
 
 	//private:
@@ -50,17 +66,19 @@ struct Executor final : executor::Executor
 
 	void spawn( Box<Future<>> &&future ) override
 	{
-		scheduler._->tasks.emplace( std::move( future ) );
+		scheduler._->tasks.emplace_back( std::move( future ) );
 		scheduler.schedule( std::move( future ) );
 	}
 	void run( nanoseconds const *timeout = nullptr )
 	{
-		if ( reactor.idle() ) return;
-		while ( true )
-		{
-			reactor.poll();
-			if ( reactor.idle() ) return;
-		}
+		reactor.with( [=] {
+			while ( true )
+			{
+				scheduler.tick();
+				if ( reactor.idle() ) return;
+				reactor.poll();
+			}
+		} );
 	}
 
 private:

@@ -21,7 +21,7 @@ auto FutureExt<Self>::then( F &&fn ) &&
 		  return lazy(
 			[fn = std::move( fn ),
 			 _ = std::move( _ )]() mutable -> Output {
-				return invoke( fn, std::move( _ ) );
+				return fn( std::move( _ ) );
 			} );
 	  } );
 }

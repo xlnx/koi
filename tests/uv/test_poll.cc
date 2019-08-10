@@ -18,18 +18,14 @@ using namespace koi;
 
 TEST( test_poll, test_poll )
 {
-	uv::Poll poll;
-	uv::Events evts;
+	vector<int> _;
+	auto open_file =
+	  fs::File::open( "/usr/bin/bash" )
+		.then( [&]( fs::File file ) {
+			_.emplace_back( 1 );
+		} );
 
-	auto open_file = fs::File::open( "/usr/bin/bash" );
-	// poll.reg( open_file, 1 );
-
-	while ( !poll.idle() )
-	{
-		poll.poll( evts );
-		for ( auto &evt : evts )
-		{
-			ASSERT_EQ( evt.token, 1 );
-		}
-	}
+	Runtime rt;
+	rt.run( std::move( open_file ) );
+	ASSERT_EQ( _, ( vector<int>{ 1 } ) );
 }

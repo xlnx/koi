@@ -25,17 +25,24 @@ struct File
 						  uv::into_poll<uv_fs_t> );
 		  } );
 		return poll_fn<File>(
-		  [step = 0, evt = std::move( evt )]( Option<File> &file ) mutable -> bool {
-			  switch ( step )
+		  [step = 0,
+		   evt = std::move( evt )]( Option<File> &_ ) mutable -> bool {
+			  while ( true )
 			  {
-			  case 0:  // uv::Poll::current()->reg( *this, 0 ); break;
-				  // case 1:
-				  if ( !evt.ready() ) return false;
-				  break;
-			  case 1: return true;
-			  default: throw 0;
+				  switch ( step )
+				  {
+				  case 0: uv::Poll::current()->reg( evt, 0 ); break;
+				  case 1:
+					  if ( evt.ready() )
+					  {
+						  _ = File{};
+						  return true;
+					  }
+					  return false;
+				  default: throw 0;
+				  }
+				  ++step;
 			  }
-			  ++step;
 		  } );
 	}
 };

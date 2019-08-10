@@ -99,6 +99,35 @@ auto invoke( F &&f, Args &&... args )
 template <typename T>
 using PollOut = typename Invoke<T>::Output;
 
+template <typename R>
+struct Submit;
+
+template <>
+struct Submit<void>
+{
+	template <typename F>
+	static None submit( F & )
+	{
+		return None{};
+	}
+};
+
+template <typename R>
+struct Submit
+{
+	template <typename F>
+	static R submit( F &fut )
+	{
+		return fut.get();
+	}
+};
+
+template <typename F>
+auto submit( F &fut )
+{
+	return Submit<typename F::Output>::submit( fut );
+}
+
 }  // namespace _
 
 using _::invoke;

@@ -37,4 +37,6 @@ using _::spawn;
 using runtime::run;
 using runtime::spawn;
 
+using runtime::Runtime;
+
 }  // namespace koi

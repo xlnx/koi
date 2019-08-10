@@ -43,7 +43,7 @@ auto then( A &&self, F &&fn )
 			  case 1:
 				  if ( second.value().poll() )
 				  {
-					  _ = second.value().get();
+					  _ = submit( second.value() );
 					  return true;
 				  }
 				  return false;
