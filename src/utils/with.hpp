@@ -3,7 +3,6 @@
 #include <functional>
 
 #include <traits/concepts.hpp>
-#include "option.hpp"
 #include "bomb.hpp"
 
 namespace koi
@@ -18,19 +17,19 @@ using namespace traits::concepts;
 template <typename T>
 struct With final : NoCopy, NoMove, NoHeap
 {
-	void with( typename NonNull<T>::Reference _, function<void()> const &fn )
+	void with( T &_, function<void()> const &fn )
 	{
-		auto old = this->_.value();
+		auto old = this->_;
 		Bomb x( [this, old] { this->_ = old; } );
 		this->_ = &_;
 		fn();
 	}
 
-	typename NonNull<T>::Reference operator*() const { return *_; }
-	typename NonNull<T>::Pointer operator->() const { return &*_; }
+	T &operator*() const { return *_; }
+	T *operator->() const { return _; }
 
 private:
-	Option<NonNull<T>> _;
+	T *_ = nullptr;
 };
 
 }  // namespace _

@@ -17,14 +17,8 @@ namespace _
 using namespace std;
 using namespace traits;
 
-template <typename A, typename B, typename R>
-struct Then;
-
 template <typename F, typename O>
 struct Shared;
-
-template <typename T>
-struct Lazy;
 
 }  // namespace _
 
@@ -35,19 +29,13 @@ namespace _
 using namespace utils::_;
 
 template <typename Self>
-struct FutureExt final : Self
+struct FutureExt : Self
 {
 	static_assert( is_base_of<Future<>, Self>::value,
 				   "FutureExt must be derived from Future<>" );
 
 	template <typename F>
-	FutureExt<
-	  Then<
-		FutureExt<Self>,
-		FutureExt<
-		  Lazy<typename InvokeResultOf<F>::type>>,
-		typename InvokeResultOf<F>::type>>
-	  then( F &&fn ) &&;
+	auto then( F &&fn ) &&;
 	// need impl then_async
 
 	FutureExt<

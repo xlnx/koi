@@ -23,18 +23,6 @@ steps:
 - checkout: self
   submodules: recursive
 - script: |
-    mkdir build.debug.gnu.cxx11
-  displayName: Make build directory, debug.gnu.cxx11
-- task: CMake@1
-  inputs: 
-    workingDirectory: 'build.debug.gnu.cxx11'
-    cmakeArgs: '-DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_STANDARD=11 ..'
-- script: |
-    cd build.debug.gnu.cxx11
-    make VERBOSE=1
-    ./test_all
-  displayName: Run tests, debug.gnu.cxx11
-- script: |
     mkdir build.debug.gnu.cxx14
   displayName: Make build directory, debug.gnu.cxx14
 - task: CMake@1

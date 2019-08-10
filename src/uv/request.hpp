@@ -1,9 +1,10 @@
 #pragma once
 
-#include <functional>
 #include <utility>
 #include <uv.h>
 
+#include "evented.hpp"
+#include "events.hpp"
 #include <utils/nonnull.hpp>
 #include <traits/concepts.hpp>
 
@@ -20,43 +21,61 @@ using namespace traits::concepts;
 template <typename T>
 struct Inner final : NoCopy
 {
-	Inner( function<void( T * )> &&fn ) :
-	  fn( std::move( fn ) )
-	{
-		// reinterpret_cast<uv_handle_t *>( &this->_ )->data = this;
-	}
-
 	T _;
-	function<void( T * )> fn;
+	size_t token;
+	bool ready = false;
 };
 
 template <typename T>
-struct Request : NoCopy
+void into_poll( T *_ )
 {
-	Request( function<void( T * )> &&fn ) :
-	  _( std::move( fn ) ) {}
+	auto inner = reinterpret_cast<Inner<T> *>( _ );
+	// auto inner = static_cast<Inner<T> *>(
+	//   reinterpret_cast<uv_handle_t *>( _ )->data );
 
-	operator T *() const { return this->get(); }
-	T *get() const { return &_._; }
+	// put this event into current polling Events
+	// this method must be called inside a Poll::poll()
+	inner->ready = true;
+	Events::current()->emplace( inner->token );
+}
 
-	void reset() const { _.ready = false; }
+// F: |uv_loop_t *| -> void
+template <typename T, typename F>
+struct Request final : Evented
+{
+	Request( F &&fn ) :
+	  fn( std::forward<F>( fn ) ) {}
+
+	size_t token() const { return _.token; }
+	T *handle() const { return &_._; }
 	bool ready() const { return _.ready; }
-	T *raw() const { return _._; }
-
-public:
-	static void into_poll( T *_ )
-	{
-		auto inner = reinterpret_cast<Inner<T> *>( _ );
-		// auto inner = static_cast<Inner<T> *>(
-		//   reinterpret_cast<uv_handle_t *>( _ )->data );
-		inner->fn( _ );
-	}
 
 private:
-	Inner<T> _;
+	void reg( uv_loop_t *selector, size_t token ) const override
+	{
+		_.token = token;
+		_.ready = false;
+		fn( selector, this );
+	}
+
+public:
+	static void into_poll( T *ptr ) { uv::_::into_poll<T>( ptr ); }
+
+private:
+	mutable Inner<T> _;
+	F fn;
 };
 
+template <typename T, typename F>
+Request<T, F> request( F &&fn )
+{
+	return Request<T, F>( std::forward<F>( fn ) );
+}
+
 }  // namespace _
+
+using _::into_poll;
+using _::request;
 
 }  // namespace uv
 

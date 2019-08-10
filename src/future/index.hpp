@@ -6,6 +6,7 @@
 #include "utils/c++2a/async.hpp"
 #endif
 #include "utils/lazy.hpp"
+#include "utils/poll_fn.hpp"
 #include "utils/shared.hpp"
 #include "utils/then.hpp"
 
@@ -17,6 +18,7 @@ namespace future
 using utils::Async;
 #endif
 using utils::lazy;
+using utils::poll_fn;
 
 }  // namespace future
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "lazy.hpp"
-#include <future/future.hpp>
 #include <utils/option.hpp>
 
 namespace koi
@@ -12,109 +11,49 @@ namespace utils
 {
 namespace _
 {
-template <typename R, typename O = void>
-struct NextFnTy
+template <typename A, typename F>
+auto then( A &&self, F &&fn )
 {
-	using type = function<R( O && )>;
-	template <typename F>
-	static R gen( F &a, type &fn )
-	{
-		return fn( a.get() );
-	}
-};
-template <typename R>
-struct NextFnTy<R>
-{
-	using type = function<R()>;
-	template <typename F>
-	static R gen( F &a, type &fn )
-	{
-		return fn();
-	}
-};
+	using B = typename InvokeResultOf<F>::type;
 
-template <typename F, typename R>
-struct NextFn
-{
-	using Ty = NextFnTy<R, typename F::Output>;
-	using type = typename Ty::type;
-	static R gen( F &a, type &fn ) { return Ty::gen( a, fn ); }
-};
+	using Output = typename B::Output;
 
-template <typename A, typename B, typename R = void>
-struct Then;
+	auto first = poll_fn<B>(
+	  [self = std::forward<A>( self ),
+	   fn = std::forward<F>( fn )]( PollOut<B> &_ ) mutable -> bool {
+		  if ( self.poll() )
+		  {
+			  _ = invoke( fn, self.get() );
+			  return true;
+		  }
+		  return false;
+	  } );
 
-template <typename A, typename B>
-struct Then<A, B> : Future<>
-{
-	using Second = typename NextFn<A, B>::type;
-
-	bool poll() override
-	{
-		while ( true )
-		{
-			switch ( step )
-			{
-			case 0:
-				if ( !first.poll() ) return false;
-				break;
-			case 1: return second.value().poll();
-			default: throw 0;
-			}
-			second = NextFn<A, B>::gen( first, fn );
-			++step;
-		}
-	}
-
-	Then( A &&a, Second &&fn ) :
-	  first( std::move( a ) ),
-	  fn( std::move( fn ) )
-	{
-	}
-
-private:
-	A first;
-	Option<B> second;
-	Second fn;
-	int step = 0;
-};
-
-// A: Future<_>, B: Future<R>
-template <typename A, typename B, typename R>
-struct Then : Future<R>
-{
-	using Second = typename NextFn<A, B>::type;
-
-	bool poll() override
-	{
-		while ( true )
-		{
-			switch ( step )
-			{
-			case 0:
-				if ( !first.poll() ) return false;
-				break;
-			case 1: return second.value().poll();
-			default: throw 0;
-			}
-			second = NextFn<A, B>::gen( first, fn );
-			++step;
-		}
-	}
-	R get() override { return second.value().get(); }
-
-	Then( A &&a, Second &&fn ) :
-	  first( std::move( a ) ),
-	  fn( std::move( fn ) )
-	{
-	}
-
-private:
-	A first;
-	Option<B> second;
-	Second fn;
-	int step = 0;
-};
+	return poll_fn<Output>(
+	  [step = 0,
+	   first = std::move( first ),
+	   second = Option<B>()]( PollOut<Output> &_ ) mutable -> bool {
+		  while ( true )
+		  {
+			  switch ( step )
+			  {
+			  case 0:
+				  if ( !first.poll() ) return false;
+				  break;
+			  case 1:
+				  if ( second.value().poll() )
+				  {
+					  _ = second.value().get();
+					  return true;
+				  }
+				  return false;
+			  default: throw 0;
+			  }
+			  second = std::move( first.get() );
+			  ++step;
+		  }
+	  } );
+}
 
 }  // namespace _
 

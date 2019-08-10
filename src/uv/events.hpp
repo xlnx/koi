@@ -4,6 +4,7 @@
 #include <functional>
 #include <uv.h>
 
+#include <utils/with.hpp>
 #include <traits/concepts.hpp>
 
 namespace koi
@@ -16,15 +17,26 @@ using namespace std;
 using namespace utils;
 using namespace traits::concepts;
 
+enum Ready
+{
+	DEFAULT = 0
+};
+
 struct Event final
 {
+	Event( size_t token, Ready kind = DEFAULT ) :
+	  token( token ),
+	  kind( kind ) {}
+
+	size_t token;
+	Ready kind;
 };
 
 struct Poll;
 
 struct Events final : NoCopy
 {
-	using Item = Events;
+	using Item = Event;
 	using Inner = vector<Item>;
 
 	Events( size_t capacity = 1024 ) { _.reserve( capacity ); }
@@ -37,9 +49,22 @@ struct Events final : NoCopy
 	size_t full() const { return size() == capacity(); }
 	size_t empty() const { return size(); }
 
+	template <typename... Args>
+	void emplace( Args &&... args )
+	{
+		_.emplace_back( std::forward<Args>( args )... );
+	}
 	Events &for_each( function<void( Event & )> const &fn )
 	{
-		// for ( auto &e : _ ) fn( e );
+		for ( auto &e : _ ) fn( e );
+		return *this;
+	}
+
+public:
+	static With<Events> &current()
+	{
+		thread_local With<Events> _;
+		return _;
 	}
 
 private:

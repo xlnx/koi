@@ -1,7 +1,8 @@
 #pragma once
 
-#include <future/future.hpp>
-#include <uv/evented.hpp>
+#include <future/index.hpp>
+#include <utils/option.hpp>
+#include <uv/request.hpp>
 #include <uv/poll.hpp>
 
 namespace koi
@@ -12,45 +13,36 @@ namespace _
 {
 using namespace std;
 using namespace future;
-
-struct OpenFuture;
+using namespace koi::utils;
 
 struct File
 {
-	static OpenFuture open( const string &path );
-};
-
-struct OpenEvent final : uv::Evented
-{
-	void reg( function<void( uv_loop_t * )> const &fn ) override
+	static auto open( const string &path, int flags = 1, int mode = -1 )
 	{
+		auto evt = uv::request<uv_fs_t>(
+		  [=]( uv_loop_t *selector, auto *request ) {
+			  uv_fs_open( selector, request->handle(), path.c_str(), flags, mode,
+						  uv::into_poll<uv_fs_t> );
+		  } );
+		return poll_fn<File>(
+		  [step = 0, evt = std::move( evt )]( Option<File> &file ) mutable -> bool {
+			  switch ( step )
+			  {
+			  case 0:  // uv::Poll::current()->reg( *this, 0 ); break;
+				  // case 1:
+				  if ( !evt.ready() ) return false;
+				  break;
+			  case 1: return true;
+			  default: throw 0;
+			  }
+			  ++step;
+		  } );
 	}
 };
-
-struct OpenFuture : Future<File>
-{
-private:
-	OpenFuture( const string &path ) :
-	  path( path ) {}
-
-	void poll() override {}
-	File poll_result() override {}
-
-private:
-	friend struct File;
-	
-	string path;
-};
-
-inline OpenFuture File::open( const string &path )
-{
-	return OpenFuture( path );
-}
 
 }  // namespace _
 
 using _::File;
-using _::OpenFuture;
 
 }  // namespace fs
 

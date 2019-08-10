@@ -2,6 +2,7 @@
 
 #include <uv/poll.hpp>
 #include <utils/nonnull.hpp>
+#include <utils/slab.hpp>
 #include <future/future.hpp>
 #include <sync/queue.hpp>
 #include <executor/park.hpp>
@@ -22,8 +23,15 @@ using namespace sync;
 struct Inner
 {
 	void wakeup() {}
-
+	size_t add_source(uv::Evented const &source)
+	{
+		size_t key = 1;
+		poll.reg(source, key);
+		return key;
+	}
+	
 	mpsc::Queue<Box<Future<>>> tasks;
+	// Slab<> io_dispatch;
 	uv::Poll poll;
 };
 
@@ -51,9 +59,11 @@ struct Reactor final : Park<Handle>
 	{
 		// this->_->poll.poll();
 	}
+	
 
 private:
 	Arc<Inner> _ = Arc<Inner>( new Inner );
+	uv::Events events;
 };
 
 }  // namespace _

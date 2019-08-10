@@ -9,7 +9,15 @@ namespace koi
 namespace traits
 {
 template <typename T>
-struct InvokeResultOf : InvokeResultOf<decltype( &T::operator() )>
+struct InvokeResultOf;
+
+template <typename T>
+struct InvokeResultOfImpl : InvokeResultOf<decltype( &T::operator() )>
+{
+};
+
+template <typename T>
+struct InvokeResultOf : InvokeResultOfImpl<typename std::decay<T>::type>
 {
 };
 
