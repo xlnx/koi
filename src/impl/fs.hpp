@@ -34,8 +34,8 @@ auto fs_async_request( E &&e, F &&f )
 {
 	return poll_fn<R>(
 	  [ok = false,
-	   fn = std::move( f ),
-	   evt = std::move( e )]( auto &_ ) mutable -> bool {
+	   fn = std::forward<F>( f ),
+	   evt = std::forward<E>( e )]( auto &_ ) mutable -> bool {
 		  if ( !ok ) {
 			  uv::Poll::current()->reg( evt, 0 );
 			  ok = true;

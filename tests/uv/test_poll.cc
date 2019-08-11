@@ -25,7 +25,7 @@ TEST( test_poll, test_poll )
 	auto open_file =
 	  fs::File::open( "../tests/uv/test_poll.cc" )
 		.then( [&]( fs::File file ) {
-			rt.spawn(
+			auto file_io =
 			  file.read( buf, sizeof( buf ) - 1 )
 				.then( [&]( ssize_t ret ) {
 					if ( ret < 0 ) {
@@ -35,16 +35,16 @@ TEST( test_poll, test_poll )
 					}
 					return 1;
 				} )
-				// .then_fut here spawns an error
-				.then( [&, file]( int ) {
-					rt.spawn(
-					  // open with readonly mode
-					  file.write( buf, 5 )
-						.then( [&]( ssize_t ret ) {
-							_.emplace_back( ret );
-						} ) );
-				} ) );
+				.then_fut( [&, file]( int ) {
+					return file.write( buf, 5 );
+				} )
+				.then( [&]( ssize_t ret ) {
+					_.emplace_back( ret );
+				} );
+			// cout << sizeof( file_io ) << endl;
+			rt.spawn( std::move( file_io ) );
 		} );
+	// cout << sizeof( open_file ) << endl;
 	rt.run( std::move( open_file ) );
 	ASSERT_EQ( _, ( vector<int>{ 14, -9 } ) );
 	ASSERT_STREQ( buf, "/*0123456789*/" );

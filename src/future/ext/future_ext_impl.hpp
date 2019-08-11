@@ -17,7 +17,7 @@ auto FutureExt<Self>::then( F &&fn ) &&
 	using Output = typename InvokeResultOf<F>::type;
 	return _::then(
 	  std::move( *this ),
-	  [fn = std::move( fn )]( typename Self::Output &&_ ) mutable {
+	  [fn = std::forward<F>( fn )]( typename Self::Output &&_ ) mutable {
 		  return lazy(
 			[fn = std::move( fn ),
 			 _ = std::move( _ )]() mutable -> Output {
@@ -34,7 +34,7 @@ auto FutureExt<Self>::then_fut( F &&fut ) &&
 	// using Output = typename Then::Output;
 	return _::then(
 	  std::move( *this ),
-	  std::move( fut ) );
+	  std::forward<F>( fut ) );
 }
 
 template <typename Self>

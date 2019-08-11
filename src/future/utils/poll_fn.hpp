@@ -43,7 +43,7 @@ template <typename F, typename R>
 struct PollFn : Future<R>
 {
 	PollFn( F &&f ) :
-	  fn( std::move( f ) ) {}
+	  fn( std::forward<F>( f ) ) {}
 
 	bool poll() override { return this->fn( this->_ ); }
 	R get() override { return std::move( _.value() ); }

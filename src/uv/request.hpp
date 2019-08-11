@@ -30,9 +30,6 @@ template <typename T>
 void into_poll( T *_ )
 {
 	auto inner = reinterpret_cast<Inner<T> *>( _ );
-	// auto inner = static_cast<Inner<T> *>(
-	//   reinterpret_cast<uv_handle_t *>( _ )->data );
-
 	// put this event into current polling Events
 	// this method must be called inside a Poll::poll()
 	inner->ready = true;
@@ -46,23 +43,23 @@ struct Request final : Evented
 	Request( F &&fn ) :
 	  fn( std::forward<F>( fn ) ) {}
 
-	size_t token() const { return _.token; }
-	T *handle() const { return &_._; }
-	bool ready() const { return _.ready; }
+	size_t token() const { return _->token; }
+	T *handle() const { return &_->_; }
+	bool ready() const { return _->ready; }
 
 private:
 	void reg( uv_loop_t *selector, size_t token ) const override
 	{
-		_.token = token;
-		_.ready = false;
+		_->token = token;
+		_->ready = false;
 		fn( selector, this );
 	}
 
 public:
-	static void into_poll( T *ptr ) { uv::_::into_poll<T>( ptr ); }
+	static void into_poll( T *_ ) { uv::_::into_poll<T>( _ ); }
 
 private:
-	mutable Inner<T> _;
+	Box<Inner<T>> _ = Box<Inner<T>>( new Inner<T> );
 	F fn;
 };
 

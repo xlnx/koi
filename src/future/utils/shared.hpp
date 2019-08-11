@@ -26,7 +26,7 @@ struct Shared<F> : Future<typename F::Output>
 	bool poll() override { return _->poll(); }
 
 	Shared( F &&_ ) :
-	  _( new F( std::move( _ ) ) )
+	  _( new F( std::forward<F>( _ ) ) )
 	{
 	}
 
@@ -47,7 +47,7 @@ struct Shared<
 	}
 
 	Shared( F &&_ ) :
-	  _( new F( std::move( _ ) ) )
+	  _( new F( std::forward<F>( _ ) ) )
 	{
 	}
 
