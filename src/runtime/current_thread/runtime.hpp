@@ -40,17 +40,21 @@ struct Scheduler
 	{
 		// _->tasks.emplace_back( std::move( future ) );
 	}
-	void tick()
+	size_t tick()
 	{
+		size_t nfut = 0;
 		auto &tasks = _->tasks;
 		for ( auto itr = tasks.begin(); itr != tasks.end(); ) {
 			if ( ( *itr )->poll() ) {
+				nfut++;
 				itr = tasks.erase( itr );
 			} else {
 				++itr;
 			}
 		}
+		return nfut;
 	}
+	bool idle() const { return _->tasks.empty(); }
 
 	//private:
 	Arc<Inner> _ = Arc<Inner>( new Inner );
@@ -70,8 +74,12 @@ struct Executor final : executor::Executor
 		reactor.with( [=] {
 			while ( true ) {
 				scheduler.tick();
-				if ( reactor.idle() ) return;
-				reactor.poll();
+				if ( scheduler.idle() ) {
+					return;
+				}
+				if ( !reactor.idle() ) {
+					reactor.poll();
+				}
 			}
 		} );
 	}

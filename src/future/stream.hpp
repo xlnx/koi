@@ -12,18 +12,26 @@ namespace _
 {
 using namespace koi::utils;
 
+enum StreamState
+{
+	Pending = 0,
+	Yield = 1,
+	Done = -1
+};
+
 template <typename T>
 struct Stream : Dynamic
 {
 	using Output = T;
 
-	virtual void poll_next() = 0;
-	virtual Option<T> poll_next_result() = 0;
+	virtual StreamState poll() = 0;
+	virtual Output get() = 0;
 };
 
 }  // namespace _
 
 using _::Stream;
+using _::StreamState;
 
 }  // namespace future
 

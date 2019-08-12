@@ -17,13 +17,13 @@ using namespace chrono;
 
 using namespace koi;
 
-TEST( test_poll, test_poll )
+TEST( test_fs, test_file_open_read_write )
 {
 	Runtime rt;
 	vector<int> _;
 	char buf[ 15 ] = { 0 };
 	auto open_file =
-	  fs::File::open( "../tests/uv/test_poll.cc" )
+	  fs::File::open( "../tests/impl/test_fs.cc" )
 		.then( [&]( fs::File file ) {
 			auto file_io =
 			  file.read( buf, sizeof( buf ) - 1 )
