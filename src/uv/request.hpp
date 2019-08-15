@@ -5,6 +5,8 @@
 
 #include "evented.hpp"
 #include "events.hpp"
+#include "poll.hpp"
+#include <future/index.hpp>
 #include <utils/nonnull.hpp>
 #include <traits/concepts.hpp>
 
@@ -18,26 +20,28 @@ using namespace std;
 using namespace utils;
 using namespace traits::concepts;
 
-template <typename T>
+template <typename T, typename A>
 struct Inner final : NoCopy
 {
 	T _;
 	size_t token;
 	bool ready = false;
+	A extra;
 };
 
-template <typename T>
-void into_poll( T *_ )
+template <typename T, typename... Args>
+void into_poll( T *_, Args... args )
 {
-	auto inner = reinterpret_cast<Inner<T> *>( _ );
+	auto inner = reinterpret_cast<Inner<T, tuple<Args...>> *>( _ );
 	// put this event into current polling Events
 	// this method must be called inside a Poll::poll()
 	inner->ready = true;
+	inner->extra = make_tuple( args... );
 	Events::current()->emplace( inner->token );
 }
 
 // F: |uv_loop_t *| -> void
-template <typename T, typename F>
+template <typename T, typename F, typename A = tuple<>>
 struct Request final : Evented
 {
 	Request( F &&fn ) :
@@ -46,6 +50,7 @@ struct Request final : Evented
 	size_t token() const { return _->token; }
 	T *handle() const { return &_->_; }
 	bool ready() const { return _->ready; }
+	A const &extra() const { return _->extra; }
 
 private:
 	void reg( uv_loop_t *selector, size_t token ) const override
@@ -55,11 +60,8 @@ private:
 		fn( selector, this );
 	}
 
-public:
-	static void into_poll( T *_ ) { uv::_::into_poll<T>( _ ); }
-
 private:
-	Box<Inner<T>> _ = Box<Inner<T>>( new Inner<T> );
+	Box<Inner<T, A>> _ = Box<Inner<T, A>>( new Inner<T, A> );
 	F fn;
 };
 
@@ -69,6 +71,12 @@ Request<T, F> request( F &&fn )
 	return Request<T, F>( std::forward<F>( fn ) );
 }
 
+template <typename T, typename A, typename F>
+Request<T, F, A> arged_request( F &&fn )
+{
+	return Request<T, F, A>( std::forward<F>( fn ) );
+}
+
 template <typename T>
 T *block_request()
 {
@@ -76,10 +84,30 @@ T *block_request()
 	return &_;
 }
 
+template <typename T, typename R, typename F>
+auto poll_once( R &&req, F &&fn )
+{
+	return future::poll_fn<T>(
+	  [ok = false,
+	   fn = std::forward<F>( fn ),
+	   req = std::forward<R>( req )]( auto &_ ) mutable -> bool {
+		  if ( !ok ) {
+			  uv::Poll::current()->reg( req, 0 );
+			  ok = true;
+		  } else if ( req.ready() ) {
+			  _ = fn( &req );
+			  return true;
+		  }
+		  return false;
+	  } );
+}
+
 }  // namespace _
 
+using _::arged_request;
 using _::block_request;
 using _::into_poll;
+using _::poll_once;
 using _::request;
 
 }  // namespace uv

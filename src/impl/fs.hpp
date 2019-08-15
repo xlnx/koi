@@ -29,35 +29,17 @@ struct Inner final : NoCopy, NoMove
 	uv_file _;
 };
 
-template <typename R, typename E, typename F>
-auto fs_async_request( E &&e, F &&f )
-{
-	return poll_fn<R>(
-	  [ok = false,
-	   fn = std::forward<F>( f ),
-	   evt = std::forward<E>( e )]( auto &_ ) mutable -> bool {
-		  if ( !ok ) {
-			  uv::Poll::current()->reg( evt, 0 );
-			  ok = true;
-		  } else if ( evt.ready() ) {
-			  _ = fn( evt.handle()->result );
-			  return true;
-		  }
-		  return false;
-	  } );
-}
-
 struct File
 {
 	static auto open( const string &path, int flags = O_RDONLY, int mode = 0 )
 	{
-		return fs_async_request<File>(
+		return uv::poll_once<File>(
 		  uv::request<uv_fs_t>(
 			[=]( uv_loop_t *selector, auto *request ) {
 				uv_fs_open( selector, request->handle(), path.c_str(), flags, mode,
 							uv::into_poll<uv_fs_t> );
 			} ),
-		  []( ssize_t _ ) { return File( _ ); } );
+		  []( auto _ ) { return File( _->handle()->result ); } );
 	}
 	static auto open_sync( const string &path, int flags = O_RDONLY, int mode = 0 )
 	{
@@ -68,14 +50,14 @@ struct File
 
 	auto read( char *buf, size_t len ) const
 	{
-		return fs_async_request<ssize_t>(
+		auto iov = uv_buf_init( buf, len );
+		return uv::poll_once<ssize_t>(
 		  uv::request<uv_fs_t>(
 			[=, _ = _]( uv_loop_t *selector, auto *request ) {
-				auto iov = uv_buf_init( buf, len );
 				uv_fs_read( selector, request->handle(), _->_, &iov, 1, -1,
 							uv::into_poll<uv_fs_t> );
 			} ),
-		  []( ssize_t _ ) { return _; } );
+		  []( auto _ ) { return _->handle()->result; } );
 	}
 	auto read_sync( char *buf, size_t len ) const
 	{
@@ -87,14 +69,14 @@ struct File
 
 	auto write( char const *buf, size_t len ) const
 	{
-		return fs_async_request<ssize_t>(
+		auto iov = uv_buf_init( const_cast<char *>( buf ), len );
+		return uv::poll_once<ssize_t>(
 		  uv::request<uv_fs_t>(
 			[=, _ = _]( uv_loop_t *selector, auto *request ) {
-				auto iov = uv_buf_init( const_cast<char *>( buf ), len );
 				uv_fs_write( selector, request->handle(), _->_, &iov, 1, -1,
 							 uv::into_poll<uv_fs_t> );
 			} ),
-		  []( ssize_t _ ) { return _; } );
+		  []( auto _ ) { return _->handle()->result; } );
 	}
 	auto write_sync( char const *buf, size_t len ) const
 	{

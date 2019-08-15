@@ -7,6 +7,8 @@ include_directories("${CMAKE_SOURCE_DIR}/src/")
 enable_testing()
 cmake_policy(SET CMP0057 NEW)
 
+set(CMAKE_CXX_FLAGS_DEBUG "-g -pg -O0")
+
 file(GLOB test_sources 
 "${CMAKE_SOURCE_DIR}/tests/**/*.cc"
 "${CMAKE_SOURCE_DIR}/tests/*.cc"

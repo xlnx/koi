@@ -22,7 +22,7 @@ auto then( A &&self, F &&fn )
 	  [self = std::forward<A>( self ),
 	   fn = std::forward<F>( fn )]( PollOut<B> &_ ) mutable -> bool {
 		  if ( self.poll() ) {
-			  _ = invoke( fn, self.get() );
+			  _ = invoke( fn, submit( self ) );
 			  return true;
 		  }
 		  return false;
