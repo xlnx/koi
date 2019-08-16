@@ -14,7 +14,7 @@ namespace _
 using namespace std;
 using namespace traits::concepts;
 
-template <typename T>
+template <typename T, typename>
 struct Option;
 
 struct New final : NoHeap
@@ -47,7 +47,7 @@ private:
 
 private:
 	Pointer _ = nullptr;
-	template <typename X>
+	template <typename X, typename>
 	friend struct Option;
 };
 
@@ -77,7 +77,7 @@ private:
 
 private:
 	unique_ptr<T> _;
-	template <typename X>
+	template <typename X, typename>
 	friend struct Option;
 };
 
@@ -107,7 +107,7 @@ private:
 
 private:
 	shared_ptr<T> _;
-	template <typename X>
+	template <typename X, typename>
 	friend struct Option;
 };
 

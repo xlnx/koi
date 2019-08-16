@@ -83,22 +83,26 @@ private:
 	optional<T> _;
 };
 #else
-template <typename T>
+
+template <typename T, typename E>
+struct Result;
+
+template <typename T, typename = void>
 struct Option final
 {
 	Option() = default;
 	Option( None ) noexcept {}
 
 	Option( const Option &other ) :
-	  has( other.has )
+	  state( other.state )
 	{
-		if ( has ) new ( reinterpret_cast<T *>( &_ ) )
+		if ( !state ) new ( reinterpret_cast<T *>( &_ ) )
 		  T( reinterpret_cast<T const &>( other._ ) );
 	}
 	Option( Option &&other ) :
-	  has( other.has )
+	  state( other.state )
 	{
-		if ( has ) new ( reinterpret_cast<T *>( &_ ) )
+		if ( !state ) new ( reinterpret_cast<T *>( &_ ) )
 		  T( std::move(
 			reinterpret_cast<T &&>( other._ ) ) );
 	}
@@ -106,64 +110,66 @@ struct Option final
 	template <typename U = T, typename = typename enable_if<
 								is_constructible<T, U>::value>::type>
 	Option( U &&value ) :
-	  has( true )
+	  state( 0 )
 	{
 		new ( reinterpret_cast<T *>( &_ ) )
 		  T( std::forward<U>( value ) );
 	}
 	template <typename... Args>
 	explicit Option( New, Args &&... args ) :
-	  has( true )
+	  state( 0 )
 	{
 		new ( reinterpret_cast<T *>( &_ ) )
 		  T( std::forward<Args>( args )... );
 	}
 	Option &operator=( None )
 	{
-		if ( has ) reinterpret_cast<T *>( &this->_ )->~T();
-		has = false;
+		if ( !state ) reinterpret_cast<T *>( &this->_ )->~T();
+		state = 1;
 		return *this;
 	}
 	template <typename U = T, typename = typename enable_if<
 								is_constructible<T, U>::value>::type>
 	Option &operator=( U &&value )
 	{
-		if ( has ) reinterpret_cast<T *>( &this->_ )->~T();
-		has = true;
+		if ( !state ) reinterpret_cast<T *>( &this->_ )->~T();
+		state = 0;
 		new ( reinterpret_cast<T *>( &_ ) )
 		  T( std::forward<U>( value ) );
 		return *this;
 	}
 	Option &operator=( Option const &other )
 	{
-		if ( has ) reinterpret_cast<T *>( &this->_ )->~T();
-		has = other.has;
-		if ( has ) new ( reinterpret_cast<T *>( &_ ) )
+		if ( !state ) reinterpret_cast<T *>( &this->_ )->~T();
+		state = other.state;
+		if ( !state ) new ( reinterpret_cast<T *>( &_ ) )
 		  T( reinterpret_cast<T const &>( other._ ) );
 		return *this;
 	}
 	Option &operator=( Option &&other )
 	{
-		if ( has ) reinterpret_cast<T *>( &this->_ )->~T();
-		has = other.has;
-		if ( has ) new ( reinterpret_cast<T *>( &_ ) )
+		if ( !state ) reinterpret_cast<T *>( &this->_ )->~T();
+		state = other.state;
+		if ( !state ) new ( reinterpret_cast<T *>( &_ ) )
 		  T( std::move(
 			reinterpret_cast<T &&>( other._ ) ) );
 		return *this;
 	}
 	~Option()
 	{
-		if ( has ) reinterpret_cast<T *>( &_ )->~T();
+		if ( !state ) reinterpret_cast<T *>( &_ )->~T();
 	}
 
-	bool has_value() const { return has; }
-	explicit operator bool() const { return has; }
+	bool has_value() const { return !state; }
+	explicit operator bool() const { return !state; }
 	T &value() & { return reinterpret_cast<T &>( _ ); }
 	const T &value() const & { return reinterpret_cast<T const &>( _ ); }
 
 private:
 	typename std::aligned_storage<sizeof( T ), alignof( T )>::type _;
-	bool has = false;
+	int state = 1;
+	template <typename X, typename E>
+	friend struct Result;
 };
 #endif
 

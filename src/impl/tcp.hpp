@@ -4,8 +4,10 @@
 
 #include <future/index.hpp>
 #include <utils/option.hpp>
+#include <utils/result.hpp>
 #include <uv/request.hpp>
 #include <uv/stream.hpp>
+#include <uv/errors.hpp>
 #include <uv/poll.hpp>
 #include <traits/concepts.hpp>
 
@@ -13,6 +15,16 @@ namespace koi
 {
 namespace net
 {
+namespace err
+{
+enum struct TcpConnectError : int
+{
+	AddrInUse = UV_EADDRINUSE,
+	Unavailible = UV_EADDRNOTAVAIL
+};
+
+}  // namespace err
+
 namespace _
 {
 using namespace std;
@@ -76,29 +88,36 @@ struct TcpStream final
 {
 	static auto connect( const string &host, int port )
 	{
+		using namespace err;
 		sockaddr_in addr;
 		uv_ip4_addr( host.c_str(), port, &addr );
 		Arc<TcpStreamImpl> impl = Arc<TcpStreamImpl>( new TcpStreamImpl );
-		return uv::poll_once<TcpStream>(
-		  uv::arged_request<uv_connect_t, tuple<int>>(
-			[addr, impl]( uv_loop_t *selector, auto *request ) {
-				impl->init();
-				uv_tcp_connect(
-				  request->handle(),
-				  impl->handle(),
-				  reinterpret_cast<const sockaddr *>( &addr ),
-				  uv::into_poll<uv_connect_t, int> );
-			} ),
-		  [impl]( auto _ ) {
-			  //   cout << uv_strerror( get<0>( _->extra() ) ) << endl;
-			  return TcpStream( impl );
+		auto req = uv::arged_request<uv_connect_t, tuple<int>>(
+		  [addr, impl]( uv_loop_t *selector, auto *request ) {
+			  impl->init();
+			  uv_tcp_connect(
+				request->handle(),
+				impl->handle(),
+				reinterpret_cast<const sockaddr *>( &addr ),
+				uv::into_poll<uv_connect_t, int> );
+		  } );
+		using Res = Result<TcpStream, uv::err::Error>;
+		return uv::poll_once<Res>(
+		  std::move( req ),
+		  [impl]( decltype( req ) *_ ) {
+			  auto stat = get<0>( _->extra() );
+			  if ( stat < 0 ) {
+				  return Res::Err( static_cast<uv::err::Error>( stat ) );
+			  } else {
+				  return Res::Ok( TcpStream( impl ) );
+			  }
 		  } );
 	}
 	auto read( char *buf, size_t len ) const
 	{
 		return poll_fn<ssize_t>(
 		  [ok = false,
-		   srv = _, buf, len]( auto &_ ) mutable -> bool {
+		   srv = _, buf, len]( Option<ssize_t> &_ ) mutable -> bool {
 			  if ( !ok ) {
 				  srv->open( buf, len );
 				  ok = true;
@@ -112,13 +131,14 @@ struct TcpStream final
 	auto write( char const *buf, size_t len ) const
 	{
 		auto iov = uv_buf_init( const_cast<char *>( buf ), len );
+		auto req = uv::arged_request<uv_write_t, tuple<int>>(
+		  [=, _ = _]( uv_loop_t *selector, auto *request ) {
+			  uv_write( request->handle(), _->stream_handle(),
+						&iov, 1, uv::into_poll<uv_write_t, int> );
+		  } );
 		return uv::poll_once<ssize_t>(
-		  uv::arged_request<uv_write_t, tuple<int>>(
-			[=, _ = _]( uv_loop_t *selector, auto *request ) {
-				uv_write( request->handle(), _->stream_handle(),
-						  &iov, 1, uv::into_poll<uv_write_t, int> );
-			} ),
-		  []( auto _ ) {
+		  std::move( req ),
+		  []( decltype( req ) *_ ) {
 			  //   cout << get<0>( _->extra() ) << endl;
 			  return 0;
 		  } );

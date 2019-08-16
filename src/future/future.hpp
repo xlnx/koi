@@ -9,6 +9,7 @@
 #endif
 
 #include <version.hpp>
+#include <utils/normalize.hpp>
 #include <traits/concepts.hpp>
 #include <traits/function.hpp>
 
@@ -44,6 +45,7 @@ namespace _
 {
 using namespace std;
 using namespace traits::concepts;
+using namespace koi::utils;
 #ifdef KOI_CXX_GE_20
 using namespace experimental;
 #endif
@@ -54,7 +56,7 @@ struct Future;
 template <>
 struct Future<> : Dynamic
 {
-	using Output = void;
+	using Output = typename NormOut<void()>::type;
 
 	virtual bool poll() = 0;
 #ifdef KOI_CXX_GE_20
@@ -85,7 +87,7 @@ private:
 template <typename T>
 struct Future : Future<>
 {
-	using Output = T;
+	using Output = typename NormOut<T()>::type;
 
 	virtual T get() = 0;
 #ifdef KOI_CXX_GE_20

@@ -9,66 +9,70 @@ namespace koi
 namespace traits
 {
 template <typename T>
-struct InvokeResultOf;
+struct Helper;
 
 template <typename T>
-struct InvokeResultOfImpl : InvokeResultOf<decltype( &T::operator() )>
+struct HelperImpl : Helper<decltype( &T::operator() )>
 {
 };
 
 template <typename T>
-struct InvokeResultOf : InvokeResultOfImpl<typename std::decay<T>::type>
+struct Helper : HelperImpl<typename std::decay<T>::type>
 {
 };
 
 template <typename Ret, typename Cls, typename... Args>
-struct InvokeResultOf<Ret ( Cls::* )( Args... )>
+struct Helper<Ret ( Cls::* )( Args... )>
 {
-	using type = Ret;
+	using return_type = Ret;
+	using argument_type = std::tuple<Args...>;
 };
 
 template <typename Ret, typename Cls, typename... Args>
-struct InvokeResultOf<Ret ( Cls::* )( Args... ) const>
+struct Helper<Ret ( Cls::* )( Args... ) const>
 {
-	using type = Ret;
+	using return_type = Ret;
+	using argument_type = std::tuple<Args...>;
 };
 
 template <typename R, typename... Args>
-struct InvokeResultOf<R( Args... )>
+struct Helper<R( Args... )>
 {
-	using type = R;
+	using return_type = R;
+	using argument_type = std::tuple<Args...>;
 };
 
 template <typename R, typename... Args>
-struct InvokeResultOf<R ( * )( Args... )>
+struct Helper<R ( * )( Args... )>
 {
-	using type = R;
+	using return_type = R;
+	using argument_type = std::tuple<Args...>;
 };
 
 template <typename R, typename... Args>
-struct InvokeResultOf<R ( *const )( Args... )>
+struct Helper<R ( *const )( Args... )>
 {
-	using type = R;
+	using return_type = R;
+	using argument_type = std::tuple<Args...>;
 };
 
 template <typename R, typename... Args>
-struct InvokeResultOf<R ( *volatile )( Args... )>
+struct Helper<R ( *volatile )( Args... )>
 {
-	using type = R;
+	using return_type = R;
+	using argument_type = std::tuple<Args...>;
 };
 
-template <typename F, typename Ret, typename... Args>
-std::tuple<Args...>
-  helper( Ret ( F::* )( Args... ) );
-
-template <typename F, typename Ret, typename... Args>
-std::tuple<Args...>
-  helper( Ret ( F::* )( Args... ) const );
+template <typename F>
+struct InvokeResultOf
+{
+	using type = typename Helper<F>::return_type;
+};
 
 template <typename F>
 struct ArgumentTypeOf
 {
-	using type = decltype( helper( &F::operator() ) );
+	using type = typename Helper<F>::argument_type;
 };
 
 template <typename Ret, typename Args>

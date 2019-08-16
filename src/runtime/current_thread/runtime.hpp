@@ -118,6 +118,9 @@ struct Runtime final : NoCopy
 	void spawn( F &&future )
 	{
 		using FutTy = typename decay<F>::type;
+		static_assert( is_base_of<Future<>, FutTy>::value,
+					   "F must be derived from Future<>" );
+
 		this->executor.spawn( Box<Future<>>(
 		  new FutTy( std::forward<F>( future ) ) ) );
 	}

@@ -87,10 +87,11 @@ T *block_request()
 template <typename T, typename R, typename F>
 auto poll_once( R &&req, F &&fn )
 {
-	return future::poll_fn<T>(
+	using O = typename NormOut<T()>::type;
+	return future::poll_fn<O>(
 	  [ok = false,
-	   fn = std::forward<F>( fn ),
-	   req = std::forward<R>( req )]( auto &_ ) mutable -> bool {
+	   fn = normalize( std::forward<F>( fn ) ),
+	   req = std::forward<R>( req )]( Option<O> &_ ) mutable -> bool {
 		  if ( !ok ) {
 			  uv::Poll::current()->reg( req, 0 );
 			  ok = true;

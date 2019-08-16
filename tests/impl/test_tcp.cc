@@ -27,13 +27,14 @@ TEST( test_tcp, test_tcp_echo_server )
 
 	auto stream_read =
 	  net::TcpStream::connect( "127.0.0.1", 5140 )
-		.then( [&]( net::TcpStream x ) {
+		.and_then( [&]( net::TcpStream x ) {
 			rt.spawn(
 			  x.write( buf[ 0 ], sizeof( buf[ 0 ] ) - 1 )
 				.then_fut( [&, x]( ssize_t ) {
 					return x.read( buf[ 2 ], 5 );
 				} ) );
-		} );
+		} )
+		.unwrap();
 
 	rt.spawn( std::move( srv ) );
 	rt.run( std::move( stream_read ) );

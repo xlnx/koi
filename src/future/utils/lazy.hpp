@@ -2,6 +2,7 @@
 
 #include "poll_fn.hpp"
 #include <traits/function.hpp>
+#include <utils/normalize.hpp>
 
 namespace koi
 {
@@ -18,10 +19,10 @@ using namespace traits;
 template <typename F>
 auto lazy( F &&fn )
 {
-	using Output = typename InvokeResultOf<F>::type;
+	using Output = typename NormOut<F>::type;
 	return poll_fn<Output>(
-	  [fn = std::forward<F>( fn )]( PollOut<Output> &_ ) mutable {
-		  _ = invoke( fn );
+	  [fn = normalize( std::forward<F>( fn ) )]( Option<Output> &_ ) mutable {
+		  _ = fn();
 		  return true;
 	  } );
 }
