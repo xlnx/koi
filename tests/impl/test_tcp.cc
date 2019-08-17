@@ -21,18 +21,20 @@ TEST( test_tcp, test_tcp_echo_server )
 			rt.spawn(
 			  x.read( buf[ 1 ], sizeof( buf[ 1 ] ) - 1 )
 				.then( [&, x]( ssize_t ) {
-					return x.write( buf[ 1 ], 5 );
+					return x.write( buf[ 1 ], 5 ).unwrap();
 				} ) );
 		} );
 
 	auto stream_read =
 	  net::TcpStream::connect( "127.0.0.1", 5140 )
 		.and_then( [&]( net::TcpStream x ) {
-			rt.spawn(
+			auto and_then =
 			  x.write( buf[ 0 ], sizeof( buf[ 0 ] ) - 1 )
 				.and_then( [&, x] {
 					return x.read( buf[ 2 ], 5 );
-				} ) );
+				} );
+			rt.spawn(
+			  std::move( and_then ) );
 		} )
 		.unwrap();
 

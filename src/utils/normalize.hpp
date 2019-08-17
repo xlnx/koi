@@ -77,11 +77,11 @@ struct NormalizeArgsImpl<D, tuple<A>>
 	}
 };
 
-// template <typename D, typename... Args>
-// struct NormalizeArgsImpl<D, tuple<Args...>>
-// {
-// 	static_assert( false, "unimplemented multi inputs" );
-// };
+template <typename D, typename A1, typename... Args>
+struct NormalizeArgsImpl<D, tuple<A1, Args...>>
+{
+	// static_assert( false, "unimplemented multi inputs" );
+};
 
 template <typename F>
 struct NormOut;

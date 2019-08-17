@@ -49,6 +49,8 @@ struct FutureExtResultable : FutureExtBasic<Self>
 template <typename Self, typename T, typename E>
 struct FutureExtResultable<Self, Result<T, E>> : FutureExtBasic<Self>
 {
+	// using Output = typename FutureExtBasic<Self>::Output;
+
 	template <typename F>
 	auto and_then( F &&fn ) &&;
 
