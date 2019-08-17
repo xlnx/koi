@@ -11,15 +11,9 @@ namespace _
 using namespace std;
 using namespace traits;
 
-namespace
-{
-struct EmptyTy
+struct Void
 {
 };
-
-}  // namespace
-
-using Void = EmptyTy;
 
 template <typename R>
 struct NormalizeRetImpl
@@ -38,7 +32,7 @@ struct NormalizeRetImpl<void>
 	static auto ret( F &&fn )
 	{
 		fn();
-		return EmptyTy{};
+		return Void{};
 	}
 };
 
