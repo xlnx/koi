@@ -35,13 +35,21 @@ Currently implemented combinators:
 ```cpp
 /*0123456789*/
 #include <iostream>
+#include <thread>
 #include <vector>
+#include <memory>
+#include <string>
+#include <algorithm>
 #include <gtest/gtest.h>
 
+#include <uv/request.hpp>
+#include <uv/poll.hpp>
 #include <koi.hpp>
 #include <impl/fs.hpp>
 
 using namespace std;
+using namespace chrono;
+
 using namespace koi;
 
 TEST( test_fs, test_file_open_read_write )
@@ -49,31 +57,33 @@ TEST( test_fs, test_file_open_read_write )
 	Runtime rt;
 	vector<int> _;
 	char buf[ 15 ] = { 0 };
+
 	auto open_file =
 	  fs::File::open( "../tests/impl/test_fs.cc" )
-		.then( [&]( fs::File file ) {
+		.and_then( [&]( fs::File file ) {
 			auto file_io =
 			  file.read( buf, sizeof( buf ) - 1 )
-				.then( [&]( ssize_t ret ) {
-					if ( ret < 0 ) {
-						cerr << uv_strerror( ret ) << endl;
-					} else {
-						_.emplace_back( ret );
-					}
-					return 1;
+				.and_then( [&]( ssize_t ret ) {
+					_.emplace_back( ret );
 				} )
-				.then_fut( [&, file]( int ) {
+				.prune()
+				.then( [&, file] {
+					_.emplace_back( 0 );
 					return file.write( buf, 5 );
 				} )
-				.then( [&]( ssize_t ret ) {
+				.and_then( [&]( ssize_t ret ) {
 					_.emplace_back( ret );
+				} )
+				.prune( [&]( uv::err::Error e ) {
+					_.emplace_back( e.err_code() );
 				} );
-			// cout << sizeof( file_io ) << endl;
+
 			rt.spawn( std::move( file_io ) );
 		} );
-	// cout << sizeof( open_file ) << endl;
+
 	rt.run( std::move( open_file ) );
-	ASSERT_EQ( _, ( vector<int>{ 14, -9 } ) );
+
+	ASSERT_EQ( _, ( vector<int>{ 14, 0, UV_EBADF } ) );
 	ASSERT_STREQ( buf, "/*0123456789*/" );
 }
 ```
@@ -95,6 +105,7 @@ TEST( test_tcp, test_tcp_echo_server )
 {
 	Runtime rt;
 	char buf[ 10 ][ 31 ] = { "Hello World" };
+	vector<int> res;
 
 	auto srv =
 	  net::TcpListener::bind( "127.0.0.1", 5140 )
@@ -103,17 +114,18 @@ TEST( test_tcp, test_tcp_echo_server )
 		.for_each( [&]( net::TcpStream x ) {
 			rt.spawn(
 			  x.read( buf[ 1 ], sizeof( buf[ 1 ] ) - 1 )
-				.then_fut( [&, x]( ssize_t ) {
-					return x.write( buf[ 1 ], 5 );
+				.and_then( [&, x]( ssize_t nread ) {
+					res.emplace_back( nread );
+					return x.write( buf[ 1 ], 5 ).unwrap();
 				} ) );
 		} );
 
 	auto stream_read =
 	  net::TcpStream::connect( "127.0.0.1", 5140 )
-		.then( [&]( net::TcpStream x ) {
+		.and_then( [&]( net::TcpStream x ) {
 			rt.spawn(
 			  x.write( buf[ 0 ], sizeof( buf[ 0 ] ) - 1 )
-				.then_fut( [&, x]( ssize_t ) {
+				.and_then( [&, x] {
 					return x.read( buf[ 2 ], 5 );
 				} ) );
 		} );
@@ -124,6 +136,26 @@ TEST( test_tcp, test_tcp_echo_server )
 	ASSERT_STREQ( buf[ 0 ], "Hello World" );
 	ASSERT_STREQ( buf[ 1 ], "Hello World" );
 	ASSERT_STREQ( buf[ 2 ], "Hello" );
+	ASSERT_EQ( res, ( vector<int>{ 30 } ) );
+}
+
+TEST( test_tcp, test_pruning )
+{
+	Runtime rt;
+	vector<int> res;
+
+	auto stream_read =
+	  net::TcpStream::connect( "127.0.0.1", 1 )
+		.and_then( [&]( net::TcpStream x ) {
+			res.emplace_back( 0 );
+		} )
+		.prune( [&]( uv::err::Error e ) {
+			res.emplace_back( e.err_code() );
+		} );
+
+	rt.run( std::move( stream_read ) );
+
+	ASSERT_EQ( res, ( vector<int>{ UV_ECONNREFUSED } ) );
 }
 ```
 

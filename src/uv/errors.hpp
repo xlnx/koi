@@ -8,7 +8,7 @@ namespace uv
 {
 namespace err
 {
-enum struct Error : int
+enum struct Err : int
 {
 	ERR_2BIG = UV_E2BIG,
 	/* argument list too long */
@@ -160,6 +160,21 @@ enum struct Error : int
 	/* no such device or address */
 	ERR_MLINK = UV_EMLINK,
 	/* too many links */
+};
+
+struct Error final
+{
+	Error( int _ ) :
+	  _( static_cast<Err>( _ ) ) {}
+	Error( Err _ ) :
+	  _( _ ) {}
+
+	Err err() const { return _; }
+	int err_code() const { return static_cast<int>( _ ); }
+	const char *msg() const { return uv_strerror( static_cast<int>( _ ) ); }
+
+private:
+	Err _;
 };
 
 }  // namespace err

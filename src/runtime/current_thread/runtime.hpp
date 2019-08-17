@@ -45,11 +45,15 @@ struct Scheduler
 		size_t nfut = 0;
 		auto &tasks = _->tasks;
 		for ( auto itr = tasks.begin(); itr != tasks.end(); ) {
-			if ( ( *itr )->poll() ) {
-				nfut++;
+			try {
+				if ( ( *itr )->poll() ) {
+					nfut++;
+					itr = tasks.erase( itr );
+				} else {
+					++itr;
+				}
+			} catch ( future::PruneCurrent ) {
 				itr = tasks.erase( itr );
-			} else {
-				++itr;
 			}
 		}
 		return nfut;

@@ -62,6 +62,11 @@ struct FutureExtResultable<Self, Result<T, E>> : FutureExtBasic<Self>
 	template <typename F>
 	auto map_err( F &&fn ) &&;
 
+	template <typename F>
+	auto prune( F &&fn ) &&;
+
+	auto prune() &&;
+
 	using FutureExtBasic<Self>::FutureExtBasic;
 };
 

@@ -33,6 +33,8 @@ using namespace koi::utils;
 using namespace traits::concepts;
 
 struct TcpListenerImpl;
+struct TcpListener;
+struct TcpStream;
 
 struct TcpStreamImpl final : uv::Stream<uv_tcp_t>
 {
@@ -50,13 +52,13 @@ struct TcpStreamImpl final : uv::Stream<uv_tcp_t>
 	void on_read( ssize_t nread, const uv_buf_t *buf ) override
 	{
 		if ( nread < 0 ) {
-			cout << uv_strerror( nread ) << endl
-				 << flush;
-			terminate();
-		}
-		this->nread += nread;
-		if ( this->nread == len ) {
+			this->err = nread;
 			uv_read_stop( stream_handle() );
+		} else {
+			this->nread += nread;
+			if ( this->nread == len ) {
+				uv_read_stop( stream_handle() );
+			}
 		}
 	}
 	void on_alloc( size_t suggested, uv_buf_t *buf ) override
@@ -79,9 +81,12 @@ private:
 		uv_tcp_init( selector, this->handle() );
 	}
 
+private:
 	char *buf;
 	size_t len, nread;
+	ssize_t err = 0;
 	bool already_init = false;
+	friend struct TcpStream;
 };
 
 struct TcpStream final
@@ -109,20 +114,25 @@ struct TcpStream final
 			  if ( stat == 0 ) {
 				  return Res::Ok( TcpStream( impl ) );
 			  } else {
-				  return Res::Err( static_cast<uv::err::Error>( stat ) );
+				  return Res::Err( stat );
 			  }
 		  } );
 	}
 	auto read( char *buf, size_t len ) const
 	{
-		return poll_fn<ssize_t>(
+		using Ret = Result<ssize_t, uv::err::Error>;
+		return poll_fn<Ret>(
 		  [ok = false,
-		   srv = _, buf, len]( Option<ssize_t> &_ ) mutable -> bool {
+		   srv = _, buf, len]( Option<Ret> &_ ) mutable -> bool {
 			  if ( !ok ) {
 				  srv->open( buf, len );
 				  ok = true;
 			  } else if ( srv->ready() ) {
-				  //   cout << "done" << endl;
+				  if ( !srv->err ) {
+					  _ = Ret::Ok( srv->nread );
+				  } else {
+					  _ = Ret::Err( srv->err );
+				  }
 				  return true;
 			  }
 			  return false;
@@ -145,7 +155,7 @@ struct TcpStream final
 			  if ( stat == 0 ) {
 				  return Res::Ok();
 			  } else {
-				  return Res::Err( static_cast<uv::err::Error>( stat ) );
+				  return Res::Err( stat );
 			  }
 		  } );
 	}

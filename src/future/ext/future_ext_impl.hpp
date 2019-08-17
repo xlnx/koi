@@ -1,6 +1,7 @@
 #pragma once
 
 #include "future_ext.hpp"
+#include "prune.hpp"
 #include <utils/normalize.hpp>
 
 namespace koi
@@ -73,6 +74,28 @@ auto FutureExtResultable<Self, Result<T, E>>::map_err( F &&fn ) &&
 		  }
 	  };
 	return _::then( std::move( *this ), std::move( map_fn ) );
+}
+
+template <typename Self, typename T, typename E>
+template <typename F>
+auto FutureExtResultable<Self, Result<T, E>>::prune( F &&fn ) &&
+{
+	auto map_fn =
+	  [fn = normalize<E>( std::forward<F>( fn ) )]( Result<T, E> res ) mutable {
+		  if ( res.is_ok() ) {
+			  return std::move( res.ok() );
+		  } else {
+			  fn( std::move( res.err() ) );
+			  prune_current();
+		  }
+	  };
+	return _::then( std::move( *this ), std::move( map_fn ) );
+}
+
+template <typename Self, typename T, typename E>
+auto FutureExtResultable<Self, Result<T, E>>::prune() &&
+{
+	return std::move( *this ).prune( [] {} );
 }
 
 template <typename Self, typename T>

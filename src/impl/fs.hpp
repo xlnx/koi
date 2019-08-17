@@ -4,6 +4,7 @@
 #include <utils/option.hpp>
 #include <uv/request.hpp>
 #include <uv/poll.hpp>
+#include <uv/errors.hpp>
 #include <traits/concepts.hpp>
 #include <traits/function.hpp>
 
@@ -42,9 +43,16 @@ struct File
 			  uv_fs_open( selector, request->handle(), path.c_str(), flags, mode,
 						  uv::into_poll<uv_fs_t> );
 		  } );
-		return uv::poll_once<File>(
+		using Ret = Result<File, uv::err::Error>;
+		return uv::poll_once<Ret>(
 		  std::move( req ),
-		  []( decltype( req ) *_ ) { return File( _->handle()->result ); } );
+		  []( decltype( req ) *_ ) {
+			  if ( _->handle()->result >= 0 ) {
+				  return Ret::Ok( File( _->handle()->result ) );
+			  } else {
+				  return Ret::Err( _->handle()->result );
+			  }
+		  } );
 	}
 	static auto open_sync( const string &path, int flags = O_RDONLY, int mode = 0 )
 	{
@@ -61,9 +69,14 @@ struct File
 			  uv_fs_read( selector, request->handle(), _->_, &iov, 1, -1,
 						  uv::into_poll<uv_fs_t> );
 		  } );
-		return uv::poll_once<ssize_t>(
+		using Ret = Result<ssize_t, uv::err::Error>;
+		return uv::poll_once<Ret>(
 		  std::move( req ),
-		  []( decltype( req ) *_ ) { return _->handle()->result; } );
+		  []( decltype( req ) *_ ) { if ( _->handle()->result >= 0 ) {
+				  return Ret::Ok( _->handle()->result );
+			  } else {
+				  return Ret::Err( _->handle()->result );
+			  } } );
 	}
 	auto read_sync( char *buf, size_t len ) const
 	{
@@ -81,9 +94,16 @@ struct File
 			  uv_fs_write( selector, request->handle(), _->_, &iov, 1, -1,
 						   uv::into_poll<uv_fs_t> );
 		  } );
-		return uv::poll_once<ssize_t>(
+		using Ret = Result<ssize_t, uv::err::Error>;
+		return uv::poll_once<Ret>(
 		  std::move( req ),
-		  []( decltype( req ) *_ ) { return _->handle()->result; } );
+		  []( decltype( req ) *_ ) {
+			  if ( _->handle()->result >= 0 ) {
+				  return Ret::Ok( _->handle()->result );
+			  } else {
+				  return Ret::Err( _->handle()->result );
+			  }
+		  } );
 	}
 	auto write_sync( char const *buf, size_t len ) const
 	{
