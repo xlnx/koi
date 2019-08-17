@@ -90,7 +90,7 @@ auto poll_once( R &&req, F &&fn )
 	using O = typename NormOut<T()>::type;
 	return future::poll_fn<O>(
 	  [ok = false,
-	   fn = normalize( std::forward<F>( fn ) ),
+	   fn = normalize<R>( std::forward<F>( fn ) ),
 	   req = std::forward<R>( req )]( Option<O> &_ ) mutable -> bool {
 		  if ( !ok ) {
 			  uv::Poll::current()->reg( req, 0 );

@@ -21,8 +21,8 @@ auto lazy( F &&fn )
 {
 	using Output = typename NormOut<F>::type;
 	return poll_fn<Output>(
-	  [fn = normalize( std::forward<F>( fn ) )]( Option<Output> &_ ) mutable {
-		  _ = fn();
+	  [fn = normalize<Void>( std::forward<F>( fn ) )]( Option<Output> &_ ) mutable {
+		  _ = fn( Void{} );
 		  return true;
 	  } );
 }

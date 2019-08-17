@@ -20,7 +20,7 @@ TEST( test_tcp, test_tcp_echo_server )
 		.for_each( [&]( net::TcpStream x ) {
 			rt.spawn(
 			  x.read( buf[ 1 ], sizeof( buf[ 1 ] ) - 1 )
-				.then_fut( [&, x]( ssize_t ) {
+				.then( [&, x]( ssize_t ) {
 					return x.write( buf[ 1 ], 5 );
 				} ) );
 		} );
@@ -30,7 +30,7 @@ TEST( test_tcp, test_tcp_echo_server )
 		.and_then( [&]( net::TcpStream x ) {
 			rt.spawn(
 			  x.write( buf[ 0 ], sizeof( buf[ 0 ] ) - 1 )
-				.then_fut( [&, x]( ssize_t ) {
+				.and_then( [&, x] {
 					return x.read( buf[ 2 ], 5 );
 				} ) );
 		} )

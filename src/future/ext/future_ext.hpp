@@ -43,9 +43,6 @@ struct FutureExtResultable : FutureExtBasic<Self>
 	template <typename F>
 	auto then( F &&fn ) &&;
 
-	template <typename F>
-	auto then_fut( F &&fut ) &&;
-
 	using FutureExtBasic<Self>::FutureExtBasic;
 };
 

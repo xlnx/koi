@@ -106,10 +106,10 @@ struct TcpStream final
 		  std::move( req ),
 		  [impl]( decltype( req ) *_ ) {
 			  auto stat = get<0>( _->extra() );
-			  if ( stat < 0 ) {
-				  return Res::Err( static_cast<uv::err::Error>( stat ) );
-			  } else {
+			  if ( stat == 0 ) {
 				  return Res::Ok( TcpStream( impl ) );
+			  } else {
+				  return Res::Err( static_cast<uv::err::Error>( stat ) );
 			  }
 		  } );
 	}
@@ -136,11 +136,17 @@ struct TcpStream final
 			  uv_write( request->handle(), _->stream_handle(),
 						&iov, 1, uv::into_poll<uv_write_t, int> );
 		  } );
-		return uv::poll_once<ssize_t>(
+		using Res = Result<void, uv::err::Error>;
+		return uv::poll_once<Res>(
 		  std::move( req ),
 		  []( decltype( req ) *_ ) {
 			  //   cout << get<0>( _->extra() ) << endl;
-			  return 0;
+			  auto stat = get<0>( _->extra() );
+			  if ( stat == 0 ) {
+				  return Res::Ok();
+			  } else {
+				  return Res::Err( static_cast<uv::err::Error>( stat ) );
+			  }
 		  } );
 	}
 

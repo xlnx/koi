@@ -35,7 +35,7 @@ TEST( test_fs, test_file_open_read_write )
 					}
 					return 1;
 				} )
-				.then_fut( [&, file]( int ) {
+				.then( [&, file]( int ) {
 					return file.write( buf, 5 );
 				} )
 				.then( [&]( ssize_t ret ) {

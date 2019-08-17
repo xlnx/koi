@@ -84,8 +84,8 @@ private:
 };
 #else
 
-template <typename T, typename E>
-struct Result;
+template <typename Self, typename T, typename E>
+struct ResultImpl;
 
 template <typename T, typename = void>
 struct Option final
@@ -168,8 +168,8 @@ struct Option final
 private:
 	typename std::aligned_storage<sizeof( T ), alignof( T )>::type _;
 	int state = 1;
-	template <typename X, typename E>
-	friend struct Result;
+	template <typename Self, typename X, typename E>
+	friend struct ResultImpl;
 };
 #endif
 

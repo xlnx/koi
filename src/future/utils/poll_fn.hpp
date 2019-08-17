@@ -24,7 +24,7 @@ struct PollFn;
 
 inline auto &none()
 {
-	using O = typename NormOut<void()>::type;
+	using O = Void;
 	static Option<O> _;
 	return _;
 }

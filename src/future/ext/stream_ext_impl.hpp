@@ -32,10 +32,10 @@ auto StreamExt<Self>::take_while( F &&fn ) &&
 	using Output = typename Self::Output;
 	return stream_poll_fn<Output>(
 	  [self = std::move( *this ),
-	   fn = normalize( std::forward<F>( fn ) )]( Option<Output> &_ ) mutable -> StreamState {
+	   fn = normalize<Output>( std::forward<F>( fn ) )]( Option<Output> &_ ) mutable -> StreamState {
 		  switch ( auto state = self.poll() ) {
 		  case StreamState::Yield:
-			  _ = submit( self );
+			  _ = std::move( self.get() );
 			  if ( !fn( _.value() ) ) return StreamState::Done;
 		  default: return state;
 		  }
@@ -66,7 +66,7 @@ auto StreamExt<Self>::skip_while( F &&fn ) &&
 	using Output = typename Self::Output;
 	return stream_poll_fn<Output>(
 	  [self = std::move( *this ),
-	   fn = normalize( std::forward<F>( fn ) ),
+	   fn = normalize<Output>( std::forward<F>( fn ) ),
 	   skipped = false]( Option<Output> &_ ) mutable -> StreamState {
 		  switch ( auto state = self.poll() ) {
 		  case StreamState::Yield:
@@ -87,7 +87,7 @@ auto StreamExt<Self>::filter( F &&fn ) &&
 	using Output = typename Self::Output;
 	return stream_poll_fn<Output>(
 	  [self = std::move( *this ),
-	   fn = normalize( std::forward<F>( fn ) )]( Option<Output> &_ ) mutable -> StreamState {
+	   fn = normalize<Output>( std::forward<F>( fn ) )]( Option<Output> &_ ) mutable -> StreamState {
 		  switch ( auto state = self.poll() ) {
 		  case StreamState::Yield:
 			  _ = std::move( self.get() );
@@ -102,7 +102,7 @@ template <typename F>
 auto StreamExt<Self>::for_each( F &&fn ) &&
 {
 	using Output = typename Self::Output;
-	using Ret = typename NormOut<void()>::type;
+	using Ret = Void;
 	return poll_fn<void>(
 	  [self = std::move( *this ),
 	   fn = std::forward<F>( fn )]( Option<Ret> &_ ) mutable -> bool {

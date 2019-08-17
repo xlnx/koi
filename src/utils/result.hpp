@@ -1,6 +1,7 @@
 #pragma once
 
 #include "option.hpp"
+#include "normalize.hpp"
 
 namespace koi
 {
@@ -10,43 +11,43 @@ namespace _
 {
 using namespace std;
 
-template <typename T, typename E = int>
-struct Result
+template <typename Self, typename T, typename E>
+struct ResultImpl
 {
-	using Item = T;
-	using Error = E;
+	using Item = typename NormOut<T()>::type;
+	using Error = typename NormOut<E()>::type;
 
-	static_assert( sizeof( E ) == sizeof( int ),
+	static_assert( sizeof( Error ) == sizeof( int ),
 				   "result only support int-sized trivial object" );
 
-	template <typename U = T, typename = typename enable_if<
-								is_constructible<T, U>::value>::type>
-	Result( U &&value ) :
+	template <typename U = Item, typename = typename enable_if<
+								   is_constructible<Item, U>::value>::type>
+	ResultImpl( U &&value ) :
 	  _( std::forward<U>( value ) )
 	{
 	}
-	Result( Result &&other ) :
+	ResultImpl( ResultImpl &&other ) :
 	  _( std::move( other._ ) )
 	{
 	}
-	Result( const Result &other ) :
-	  _( other )
+	ResultImpl( const ResultImpl &other ) :
+	  _( other._ )
 	{
 	}
 
-	template <typename U = T, typename = typename enable_if<
-								is_constructible<T, U>::value>::type>
-	Result &operator=( U &&value )
+	template <typename U = Item, typename = typename enable_if<
+								   is_constructible<Item, U>::value>::type>
+	ResultImpl &operator=( U &&value )
 	{
 		_ = std::forward<U>( value );
 		return *this;
 	}
-	Result &operator=( Result const &other )
+	ResultImpl &operator=( ResultImpl const &other )
 	{
 		_ = other._;
 		return *this;
 	}
-	Result &operator=( Result &&other )
+	ResultImpl &operator=( ResultImpl &&other )
 	{
 		_ = std::move( other._ );
 		return *this;
@@ -55,37 +56,45 @@ struct Result
 	bool is_ok() const { return _.has_value(); }
 	bool is_err() const { return !_.has_value(); }
 	explicit operator bool() const { return is_ok(); }
-	T &ok() & { return _.value(); }
-	const T &ok() const & { return _.value(); }
-	E err() const { return reinterpret_cast<E const &>( _.state ); }
+	Item &ok() & { return _.value(); }
+	const Item &ok() const & { return _.value(); }
+	Error err() const { return reinterpret_cast<Error const &>( _.state ); }
 
-private:
-	Result() = default;
+protected:
+	ResultImpl() = default;
 
 public:
-	template <typename U = T, typename = typename enable_if<
-								is_constructible<T, U>::value>::type>
-	static Result Ok( U &&value )
+	template <typename U = Item, typename = typename enable_if<
+								   is_constructible<Item, U>::value>::type>
+	static Self Ok( U &&value )
 	{
-		return Result( std::forward<U>( value ) );
+		return Self( std::forward<U>( value ) );
 	}
 
-	static Result Err( E const &err )
+	static Self Err( Error const &err )
 	{
 		auto &err_code = reinterpret_cast<int const &>( err );
 		assert( err_code != 0 );
-		Result res;
+		Self res;
 		res._.state = err_code;
 		return res;
 	}
 
-private:
-	Option<T, char> _;
+protected:
+	Option<Item, char> _;
 };
 
-template <typename E>
-struct Result<void, E> : Result<None, E>
+template <typename Self, typename E>
+struct ResultImpl<Self, void, E> : ResultImpl<Self, Void, E>
 {
+	using ResultImpl<Self, Void, E>::ResultImpl;
+	static Self Ok() { return Void{}; }
+};  // namespace _
+
+template <typename T, typename E = int>
+struct Result : ResultImpl<Result<T, E>, T, E>
+{
+	using ResultImpl<Result<T, E>, T, E>::ResultImpl;
 };
 
 }  // namespace _

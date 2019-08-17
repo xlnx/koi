@@ -56,7 +56,7 @@ struct Future;
 template <>
 struct Future<> : Dynamic
 {
-	using Output = typename NormOut<void()>::type;
+	using Output = Void;
 
 	virtual bool poll() = 0;
 #ifdef KOI_CXX_GE_20
