@@ -19,7 +19,16 @@ Futures can be chained using various **combinators**.
 Currently implemented combinators:
 
 * `Future<R1>.then(Fn(R1)->R2) => Future<R2>`
+* `Future<R1>.join(Future<Rn>...) => Future<tuple<R1, Rn...>>`
 * `Future<R1>.shared() => SharedFuture<R1>`
+
+Future outputing results:
+
+* `Future<Result<R1, E>>.and_then(Fn(R1)->R2) => Future<Result<R2, E>>`
+* `Future<Result<R, E1>>.map_err(Fn(E1)->E2) => Future<Result<R, E2>>`
+* `Future<Result<R, E>>.or_else(Fn(E)->R) => Future<R>`
+* `Future<Result<R, E>>.unwrap() => Future<R>`
+* `Future<Result<R, E>>.prune(Fn(E)->!) => Future<R>|!`
 
 ## Stream Combinators
 

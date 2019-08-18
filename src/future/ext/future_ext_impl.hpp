@@ -105,6 +105,13 @@ auto FutureExtResultable<Self, T>::then( F &&fn ) &&
 	return _::then( std::move( *this ), std::forward<F>( fn ) );
 }
 
+template <typename Self, typename T>
+template <typename... Futs>
+auto FutureExtResultable<Self, T>::join( Futs &&... futs ) &&
+{
+	return _::join( std::move( *this ), std::forward<Futs>( futs )... );
+}
+
 template <typename Self>
 FutureExt<
   Shared<

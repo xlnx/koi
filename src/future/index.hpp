@@ -10,6 +10,7 @@
 #include "utils/poll_fn.hpp"
 #include "utils/shared.hpp"
 #include "utils/then.hpp"
+#include "utils/join.hpp"
 #include "utils/stream_poll_fn.hpp"
 
 namespace koi

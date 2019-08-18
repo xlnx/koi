@@ -35,10 +35,10 @@ TEST( test_tcp, test_tcp_echo_server )
 				.and_then( [&, x] {
 					return x.read( buf[ 2 ], 5 );
 				} ) );
-		} );
+		} )
+		.unwrap();
 
-	rt.spawn( std::move( srv ) );
-	rt.run( std::move( stream_read ) );
+	rt.run( std::move( srv ).join( std::move( stream_read ) ) );
 
 	ASSERT_STREQ( buf[ 0 ], "Hello World" );
 	ASSERT_STREQ( buf[ 1 ], "Hello World" );

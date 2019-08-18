@@ -43,6 +43,9 @@ struct FutureExtResultable : FutureExtBasic<Self>
 	template <typename F>
 	auto then( F &&fn ) &&;
 
+	template <typename... Futs>
+	auto join( Futs &&... futs ) &&;
+
 	using FutureExtBasic<Self>::FutureExtBasic;
 };
 
