@@ -16,14 +16,14 @@ namespace _
 	};                                                      \
 	}  // namespace std::experimental
 
-#define KOI_FUTURE_STD_HOOK_T( Future )                           \
-	namespace std::experimental                                   \
-	{                                                             \
-	template <typename... T, typename... Args>                    \
-	struct coroutine_traits<Future<T...>, Args...>                \
-	{                                                             \
-		using promise_type = typename Future<T...>::promise_type; \
-	};                                                            \
+#define KOI_FUTURE_STD_HOOK_T( Future )                        \
+	namespace std::experimental                                \
+	{                                                          \
+	template <typename T, typename... Args>                    \
+	struct coroutine_traits<Future<T>, Args...>                \
+	{                                                          \
+		using promise_type = typename Future<T>::promise_type; \
+	};                                                         \
 	}  // namespace std::experimental
 
 }  // namespace _

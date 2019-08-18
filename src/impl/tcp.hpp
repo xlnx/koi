@@ -146,7 +146,7 @@ struct TcpStream final
 			  uv_write( request->handle(), _->stream_handle(),
 						&iov, 1, uv::into_poll<uv_write_t, int> );
 		  } );
-		using Res = Result<void, uv::err::Error>;
+		using Res = Result<Void, uv::err::Error>;
 		return uv::poll_once<Res>(
 		  std::move( req ),
 		  []( decltype( req ) *_ ) {

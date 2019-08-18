@@ -63,13 +63,11 @@ TEST( test_tcp, test_tcp_cxx2a )
 			co_await x.write( buf[ 1 ], 5 ).unwrap();
 		} );
 
-	auto stream_read =
-	  net::TcpStream::connect( "127.0.0.1", 5100 )
-		.and_then( [&]( net::TcpStream x ) -> Async<> {
-			co_await x.write( buf[ 0 ], sizeof( buf[ 0 ] ) - 1 ).unwrap();
-			auto nread = co_await x.read( buf[ 2 ], 5 );
-		} )
-		.unwrap();
+	auto stream_read = [&]() -> Async<> {
+		auto x = co_await net::TcpStream::connect( "127.0.0.1", 5100 ).unwrap();
+		co_await x.write( buf[ 0 ], sizeof( buf[ 0 ] ) - 1 ).prune();
+		auto nread = co_await x.read( buf[ 2 ], 5 );
+	}();
 
 	rt.run( std::move( srv ).join( std::move( stream_read ) ) );
 

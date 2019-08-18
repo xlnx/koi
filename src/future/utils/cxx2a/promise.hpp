@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <utils/option.hpp>
+#include <utils/normalize.hpp>
 #include <experimental/coroutine>
 #include <traits/concepts.hpp>
 
@@ -37,7 +38,7 @@ template <>
 struct Promise<> : PromiseBase
 {
 	void return_void() noexcept {}
-	void value() noexcept {}
+	Void value() noexcept { return Void{}; }
 };
 
 template <typename T = void>

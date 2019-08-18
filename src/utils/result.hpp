@@ -14,8 +14,8 @@ using namespace std;
 template <typename Self, typename T, typename E>
 struct ResultImpl
 {
-	using Item = typename NormOut<T()>::type;
-	using Error = typename NormOut<E()>::type;
+	using Item = T;
+	using Error = E;
 
 	static_assert( sizeof( Error ) == sizeof( int ),
 				   "result only support int-sized trivial object" );
@@ -89,12 +89,25 @@ struct ResultImpl<Self, void, E> : ResultImpl<Self, Void, E>
 {
 	using ResultImpl<Self, Void, E>::ResultImpl;
 	static Self Ok() { return Void{}; }
-};  // namespace _
+};
 
 template <typename T, typename E = int>
 struct Result : ResultImpl<Result<T, E>, T, E>
 {
 	using ResultImpl<Result<T, E>, T, E>::ResultImpl;
+};
+
+template <typename E>
+struct Result<Void, E> : ResultImpl<Result<Void, E>, Void, E>
+{
+	using ResultImpl<Result<Void, E>, Void, E>::ResultImpl;
+	template <typename U = Void, typename = typename enable_if<
+								   is_constructible<Void, U>::value>::type>
+	static Result Ok( U &&value )
+	{
+		return Void{};
+	}
+	static Result Ok() { return Void{}; }
 };
 
 }  // namespace _
