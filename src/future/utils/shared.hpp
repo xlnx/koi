@@ -17,42 +17,26 @@ using namespace std;
 using namespace traits::concepts;
 using namespace koi::utils;
 
-template <typename F, typename O = void>
-struct Shared;
-
-template <typename F>
-struct Shared<F> : Future<typename F::Output>
+template <typename O>
+struct Shared : Future<O>
 {
-	bool poll() override { return _->poll(); }
-
-	Shared( F &&_ ) :
-	  _( new F( std::forward<F>( _ ) ) )
-	{
-	}
-
-private:
-	Arc<F> _;
-};
-
-template <typename F>
-struct Shared<
-  F, typename enable_if<
-	   !is_same<void, typename F::Output>::value,
-	   typename F::Output>::type> : Future<typename F::Output>
-{
-	bool poll() override { return _->poll(); }
-	typename F::Output get() override
+	PollState poll() override { return _->poll(); }
+	O get() override
 	{
 		return this->_->get();
 	}
 
-	Shared( F &&_ ) :
-	  _( new F( std::forward<F>( _ ) ) )
+	template <typename U, typename = typename enable_if<
+							is_same<typename U::Output, O>::value>::type>
+	Shared( U &&_ ) :
+	  _( new U( std::forward<U>( _ ) ) )
 	{
 	}
 
+	Arc<Future<O>> inner() const { return _; }
+
 private:
-	Arc<F> _;
+	Arc<Future<O>> _;
 };
 
 }  // namespace _

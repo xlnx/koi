@@ -95,36 +95,32 @@ struct CollectSeq
 struct PollSeq
 {
 	template <typename... Futs, typename... Done>
-	static bool poll( tuple<Futs...> &futs, tuple<Done...> &done )
+	static PollState poll( tuple<Futs...> &futs, tuple<Done...> &done )
 	{
 		auto zipped = Zipped::zip( futs, done );
 		return poll_impl( zipped, typename MakeSeq<sizeof...( Futs )>::type{} );
 	}
 
 	template <typename... A, size_t... I>
-	static bool poll_impl( tuple<A...> &polls, IntSeq<I...> i )
+	static PollState poll_impl( tuple<A...> &polls, IntSeq<I...> i )
 	{
-		array<bool, sizeof...( A )> _ = { poll_one( get<I>( polls ) )... };
-		for ( auto done : _ ) {
-			if ( !done ) return false;
+		array<PollState, sizeof...( A )> _ = { poll_one( get<I>( polls ) )... };
+		for ( auto poll : _ ) {
+			if ( poll != PollState::Ok ) return poll;
 		}
-		return true;
+		return PollState::Ok;
 	}
 
 	template <typename Fut, typename Done>
-	static bool poll_one( pair<Fut, Done> &poll )
+	static PollState poll_one( pair<Fut, Done> &poll )
 	{
-		if ( *poll.second ) return true;
-		if ( poll.first->poll() ) {
-			*poll.second = true;
-			return true;
-		}
-		return false;
+		if ( *poll.second != PollState::Pending ) return *poll.second;
+		return *poll.second = poll.first->poll();
 	}
 };
 
 template <typename A, typename T>
-bool expand_with( T &&t )
+auto expand_with( T &&t )
 {
 	return std::forward<T>( t );
 }
@@ -134,15 +130,14 @@ auto join( Futs &&... fs )
 {
 	using Output = tuple<typename Futs::Output...>;
 	auto futs = make_tuple( std::forward<Futs>( fs )... );
-	auto done = make_tuple( expand_with<Futs>( false )... );
+	auto done = make_tuple( expand_with<Futs>( PollState::Pending )... );
 	return poll_fn<Output>(
 	  [futs = std::move( futs ),
-	   done = std::move( done )]( Option<Output> &_ ) mutable -> bool {
-		  if ( PollSeq::poll( futs, done ) ) {
-			  CollectSeq::collect( futs, _ );
-			  return true;
+	   done = std::move( done )]( Option<Output> &_ ) mutable -> PollState {
+		  switch ( auto poll = PollSeq::poll( futs, done ) ) {
+		  case PollState::Ok: CollectSeq::collect( futs, _ );
+		  default: return poll;
 		  }
-		  return false;
 	  } );
 }
 

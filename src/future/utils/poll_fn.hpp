@@ -35,7 +35,7 @@ struct PollFn<F> : Future<>
 	PollFn( F &&f ) :
 	  fn( std::forward<F>( f ) ) {}
 
-	bool poll() override { return this->fn( none() ); }
+	PollState poll() override { return this->fn( none() ); }
 
 private:
 	F fn;
@@ -47,7 +47,7 @@ struct PollFn : Future<R>
 	PollFn( F &&f ) :
 	  fn( std::forward<F>( f ) ) {}
 
-	bool poll() override { return this->fn( this->_ ); }
+	PollState poll() override { return this->fn( this->_ ); }
 	R get() override { return std::move( _.value() ); }
 
 private:

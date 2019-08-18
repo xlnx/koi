@@ -15,7 +15,7 @@ using namespace std;
 using namespace traits::concepts;
 
 template <typename T>
-struct With final : NoCopy, NoMove, NoHeap
+struct With : NoCopy, NoHeap
 {
 	void with( T &_, function<void()> const &fn )
 	{
@@ -27,6 +27,8 @@ struct With final : NoCopy, NoMove, NoHeap
 
 	T &operator*() const { return *_; }
 	T *operator->() const { return _; }
+
+	bool has() const { return _; }
 
 private:
 	T *_ = nullptr;

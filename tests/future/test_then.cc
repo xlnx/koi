@@ -30,7 +30,7 @@ TEST( test_then, test_then )
 					 a.emplace_back( b );
 					 return string( "test then" );
 				 } );
-	ASSERT_EQ( job.poll(), true );
+	ASSERT_EQ( job.poll(), PollState::Ok );
 	ASSERT_EQ( job.get(), "test then" );
 	ASSERT_EQ( a, ( decltype( a ){ 1, 2, 3 } ) );
 }

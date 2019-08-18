@@ -91,15 +91,15 @@ auto poll_once( R &&req, F &&fn )
 	return future::poll_fn<O>(
 	  [ok = false,
 	   fn = normalize<R>( std::forward<F>( fn ) ),
-	   req = std::forward<R>( req )]( Option<O> &_ ) mutable -> bool {
+	   req = std::forward<R>( req )]( Option<O> &_ ) mutable -> PollState {
 		  if ( !ok ) {
 			  uv::Poll::current()->reg( req, 0 );
 			  ok = true;
 		  } else if ( req.ready() ) {
 			  _ = fn( &req );
-			  return true;
+			  return PollState::Ok;
 		  }
-		  return false;
+		  return PollState::Pending;
 	  } );
 }
 

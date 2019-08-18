@@ -102,6 +102,12 @@ struct Arc final
 
 	Pointer get() const { return _.get(); }
 
+	template <typename U, typename = typename enable_if<is_base_of<U, T>::value>::type>
+	Arc<U> downcast() const
+	{
+		return Arc<U>( _.get() );
+	}
+
 private:
 	Arc() = default;
 

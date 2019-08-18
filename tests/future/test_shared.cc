@@ -25,7 +25,7 @@ TEST( test_shared, test_shared )
 				 .shared();
 	decltype( job ) j1( job );
 	decltype( job ) j2( job );
-	ASSERT_EQ( j1.poll(), true );
+	ASSERT_EQ( j1.poll(), PollState::Ok );
 	ASSERT_EQ( j2.get(), "shared" );
 	ASSERT_EQ( a, ( decltype( a ){ 1 } ) );
 }

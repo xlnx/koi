@@ -40,7 +40,7 @@ struct Poll final : NoCopy
 	{
 		events._.clear();
 		Events::current().with( events, [&] {
-			uv_run( _.get(), UV_RUN_ONCE );
+			uv_run( _.get(), UV_RUN_NOWAIT );
 		} );
 	}
 	bool idle() const

@@ -23,7 +23,7 @@ auto lazy( F &&fn )
 	return poll_fn<Output>(
 	  [fn = normalize<Void>( std::forward<F>( fn ) )]( Option<Output> &_ ) mutable {
 		  _ = fn( Void{} );
-		  return true;
+		  return PollState::Ok;
 	  } );
 }
 

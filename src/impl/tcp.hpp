@@ -123,7 +123,7 @@ struct TcpStream final
 		using Ret = Result<ssize_t, uv::err::Error>;
 		return poll_fn<Ret>(
 		  [ok = false,
-		   srv = _, buf, len]( Option<Ret> &_ ) mutable -> bool {
+		   srv = _, buf, len]( Option<Ret> &_ ) mutable -> PollState {
 			  if ( !ok ) {
 				  srv->open( buf, len );
 				  ok = true;
@@ -133,9 +133,9 @@ struct TcpStream final
 				  } else {
 					  _ = Ret::Err( srv->err );
 				  }
-				  return true;
+				  return PollState::Ok;
 			  }
-			  return false;
+			  return PollState::Pending;
 		  } );
 	}
 	auto write( char const *buf, size_t len ) const

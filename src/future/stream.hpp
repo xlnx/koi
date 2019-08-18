@@ -12,7 +12,7 @@ namespace _
 {
 using namespace koi::utils;
 
-enum StreamState
+enum struct StreamState : int
 {
 	Pending = 0,
 	Yield = 1,

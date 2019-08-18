@@ -15,7 +15,7 @@ TEST( test_tcp, test_tcp_echo_server )
 	vector<int> res;
 
 	auto srv =
-	  net::TcpListener::bind( "127.0.0.1", 5140 )
+	  net::TcpListener::bind( "127.0.0.1", 5200 )
 		.incoming()
 		.take( 1 )
 		.for_each( [&]( net::TcpStream x ) {
@@ -28,7 +28,7 @@ TEST( test_tcp, test_tcp_echo_server )
 		} );
 
 	auto stream_read =
-	  net::TcpStream::connect( "127.0.0.1", 5140 )
+	  net::TcpStream::connect( "127.0.0.1", 5200 )
 		.and_then( [&]( net::TcpStream x ) {
 			rt.spawn(
 			  x.write( buf[ 0 ], sizeof( buf[ 0 ] ) - 1 )
@@ -44,6 +44,40 @@ TEST( test_tcp, test_tcp_echo_server )
 	ASSERT_STREQ( buf[ 1 ], "Hello World" );
 	ASSERT_STREQ( buf[ 2 ], "Hello" );
 	ASSERT_EQ( res, ( vector<int>{ 30 } ) );
+}
+
+char buf[ 10 ][ 31 ] = { "Hello World" };
+
+TEST( test_tcp, test_tcp_cxx2a )
+{
+#ifdef KOI_CXX_GE_20
+	Runtime rt;
+	vector<int> res;
+
+	auto srv =
+	  net::TcpListener::bind( "127.0.0.1", 5100 )
+		.incoming()
+		.take( 1 )
+		.for_each( [&]( net::TcpStream x ) -> Async<> {
+			auto nread = co_await x.read( buf[ 1 ], sizeof( buf[ 1 ] ) - 1 ).prune();
+			co_await x.write( buf[ 1 ], 5 ).unwrap();
+		} );
+
+	auto stream_read =
+	  net::TcpStream::connect( "127.0.0.1", 5100 )
+		.and_then( [&]( net::TcpStream x ) -> Async<> {
+			co_await x.write( buf[ 0 ], sizeof( buf[ 0 ] ) - 1 ).unwrap();
+			auto nread = co_await x.read( buf[ 2 ], 5 );
+		} )
+		.unwrap();
+
+	rt.run( std::move( srv ).join( std::move( stream_read ) ) );
+
+	ASSERT_STREQ( buf[ 0 ], "Hello World" );
+	ASSERT_STREQ( buf[ 1 ], "Hello World" );
+	ASSERT_STREQ( buf[ 2 ], "Hello" );
+	// ASSERT_EQ( res, ( vector<int>{ 30 } ) );
+#endif
 }
 
 TEST( test_tcp, test_pruning )

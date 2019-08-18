@@ -2,7 +2,6 @@
 
 #include "stream_ext.hpp"
 #include <future/utils/poll_fn.hpp>
-#include <utils/normalize.hpp>
 
 namespace koi
 {
@@ -105,11 +104,11 @@ auto StreamExt<Self>::for_each( F &&fn ) &&
 	using Ret = Void;
 	return poll_fn<void>(
 	  [self = std::move( *this ),
-	   fn = std::forward<F>( fn )]( Option<Ret> &_ ) mutable -> bool {
+	   fn = into_future<Output>( std::forward<F>( fn ) )]( Option<Ret> &_ ) mutable -> PollState {
 		  switch ( self.poll() ) {
-		  case StreamState::Yield: fn( std::move( self.get() ) );
-		  case StreamState::Pending: return false;
-		  case StreamState::Done: return true;
+		  case StreamState::Yield: runtime::_::spawn( fn( std::move( self.get() ) ) );
+		  case StreamState::Pending: return PollState::Pending;
+		  case StreamState::Done: return PollState::Ok;
 		  default: throw 0;
 		  }
 	  } );

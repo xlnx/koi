@@ -4,14 +4,18 @@
 #include <memory>
 #include <functional>
 
+#include <version.hpp>
 #ifdef KOI_CXX_GE_20
 #include <experimental/coroutine>
 #endif
 
-#include <version.hpp>
 #include <utils/normalize.hpp>
+#include <utils/nonnull.hpp>
 #include <traits/concepts.hpp>
 #include <traits/function.hpp>
+
+#define DEBUG
+#include "log.hpp"
 
 namespace koi
 {
@@ -35,7 +39,7 @@ namespace utils
 {
 namespace _
 {
-template <typename F, typename O>
+template <typename O>
 struct Shared;
 }
 
@@ -47,8 +51,15 @@ using namespace std;
 using namespace traits::concepts;
 using namespace koi::utils;
 #ifdef KOI_CXX_GE_20
-using namespace experimental;
+using namespace std::experimental;
 #endif
+
+enum struct PollState : int
+{
+	Ok = 0,
+	Pending = 1,
+	Pruned = -1
+};
 
 template <typename F = void>
 struct Future;
@@ -58,16 +69,7 @@ struct Future<> : Dynamic
 {
 	using Output = Void;
 
-	virtual bool poll() = 0;
-#ifdef KOI_CXX_GE_20
-	template <typename P>
-	void await_suspend( coroutine_handle<P> _ ) const noexcept
-	{
-		using Future = typename P::Future;
-		runtime::_::spawn( Future( _ ) );
-	}
-	bool await_ready() const noexcept { return false; }
-#endif
+	virtual PollState poll() = 0;
 
 	Future() = default;
 	Future( Future && ) = default;
@@ -80,7 +82,7 @@ private:
 private:
 	template <typename T>
 	friend struct Future;
-	template <typename F, typename O>
+	template <typename O>
 	friend struct utils::_::Shared;
 };
 
@@ -90,12 +92,6 @@ struct Future : Future<>
 	using Output = typename NormOut<T()>::type;
 
 	virtual T get() = 0;
-#ifdef KOI_CXX_GE_20
-	T await_resume() noexcept
-	{
-		return this->get();
-	}
-#endif
 
 	Future() = default;
 	Future( Future && ) = default;
@@ -104,13 +100,14 @@ struct Future : Future<>
 private:
 	Future( Future const & ) = default;
 	Future &operator=( Future const & ) = default;
-	template <typename F, typename O>
+	template <typename O>
 	friend struct utils::_::Shared;
 };
 
 }  // namespace _
 
 using _::Future;
+using _::PollState;
 
 }  // namespace future
 
@@ -121,4 +118,5 @@ using _::Future;
 namespace koi
 {
 using future::Future;
-}
+using future::PollState;
+}  // namespace koi

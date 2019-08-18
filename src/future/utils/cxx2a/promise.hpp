@@ -3,6 +3,7 @@
 #include <iostream>
 #include <utils/option.hpp>
 #include <experimental/coroutine>
+#include <traits/concepts.hpp>
 
 namespace koi::future::promise
 {
@@ -10,8 +11,10 @@ namespace _
 {
 using namespace std;
 using namespace experimental;
+using namespace koi::utils;
+using namespace traits::concepts;
 
-struct PromiseBase
+struct PromiseBase : NoCopy, NoMove
 {
 	PromiseBase() {}
 	~PromiseBase() {}

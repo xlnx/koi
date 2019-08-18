@@ -4,6 +4,7 @@
 #include <utility>
 #include <list>
 
+#include <runtime/runtime.hpp>
 #include <reactor/reactor.hpp>
 #include <sync/queue.hpp>
 #include <future/future.hpp>
@@ -45,14 +46,13 @@ struct Scheduler
 		size_t nfut = 0;
 		auto &tasks = _->tasks;
 		for ( auto itr = tasks.begin(); itr != tasks.end(); ) {
-			try {
-				if ( ( *itr )->poll() ) {
-					nfut++;
-					itr = tasks.erase( itr );
-				} else {
-					++itr;
-				}
-			} catch ( future::PruneCurrent ) {
+			switch ( ( *itr )->poll() ) {
+			case PollState::Pending:
+				++itr;
+				break;
+			case PollState::Ok:
+				nfut++;
+			case PollState::Pruned:
 				itr = tasks.erase( itr );
 			}
 		}
@@ -94,7 +94,7 @@ private:
 	friend struct Runtime;
 };
 
-struct Runtime final : NoCopy
+struct Runtime : runtime::_::Runtime
 {
 	struct Builder final : NoCopy
 	{
@@ -106,27 +106,16 @@ struct Runtime final : NoCopy
 
 	Runtime() = default;
 
-	template <typename F>
-	void run( F &&future )
+	void run() override
 	{
-		this->spawn( std::forward<F>( future ) );
-		this->executor.run();
-		// while ( !this->executor.tasks.empty() )
-		// {
-		// 	auto front = this->executor.tasks.pop();
-		// 	front->poll();
-		// }
+		runtime::_::current_runtime().with( *this, [&] {
+			this->executor.run();
+		} );
 	}
 
-	template <typename F>
-	void spawn( F &&future )
+	void spawn( Box<Future<>> &&fut ) override
 	{
-		using FutTy = typename decay<F>::type;
-		static_assert( is_base_of<Future<>, FutTy>::value,
-					   "F must be derived from Future<>" );
-
-		this->executor.spawn( Box<Future<>>(
-		  new FutTy( std::forward<F>( future ) ) ) );
+		this->executor.spawn( std::move( fut ) );
 	}
 
 private:
@@ -136,7 +125,7 @@ private:
 
 }  // namespace _
 
-using _::Runtime;
+using Runtime = runtime::_::TypedRuntime<_::Runtime>;
 
 }  // namespace current_thread
 

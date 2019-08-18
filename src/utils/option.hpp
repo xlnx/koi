@@ -1,7 +1,6 @@
 #pragma once
 
 #include <version.hpp>
-
 #ifdef KOI_CXX_GE_17
 #include <optional>
 #else
@@ -206,7 +205,7 @@ private:
                                                                                \
 		bool has_value() const { return bool( _._ ); }                         \
 		explicit operator bool() const { return has_value(); }                 \
-		Ptr<T> value() const { return _; }                                     \
+		Ptr<T> &value() { return _; }                                          \
                                                                                \
 	private:                                                                   \
 		Ptr<T> _;                                                              \

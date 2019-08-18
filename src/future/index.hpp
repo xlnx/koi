@@ -4,10 +4,11 @@
 #include "stream.hpp"
 
 #ifdef KOI_CXX_GE_20
-#include "utils/c++2a/async.hpp"
+#include "utils/cxx2a/async.hpp"
 #endif
 #include "utils/lazy.hpp"
 #include "utils/poll_fn.hpp"
+#include "utils/into_future.hpp"
 #include "utils/shared.hpp"
 #include "utils/then.hpp"
 #include "utils/join.hpp"

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "future_ext.hpp"
-#include "prune.hpp"
 #include <utils/normalize.hpp>
 
 namespace koi
@@ -80,16 +79,21 @@ template <typename Self, typename T, typename E>
 template <typename F>
 auto FutureExtResultable<Self, Result<T, E>>::prune( F &&fn ) &&
 {
-	auto map_fn =
+	auto prune_fn =
 	  [fn = normalize<E>( std::forward<F>( fn ) )]( Result<T, E> res ) mutable {
-		  if ( res.is_ok() ) {
-			  return std::move( res.ok() );
-		  } else {
-			  fn( std::move( res.err() ) );
-			  prune_current();
-		  }
+		  return poll_fn<T>(
+			[res = std::move( res ),
+			 fn = std::move( fn )]( Option<T> &_ ) mutable -> PollState {
+				if ( res.is_ok() ) {
+					_ = std::move( res.ok() );
+					return PollState::Ok;
+				} else {
+					fn( std::move( res.err() ) );
+					return PollState::Pruned;
+				}
+			} );
 	  };
-	return _::then( std::move( *this ), std::move( map_fn ) );
+	return _::then( std::move( *this ), std::move( prune_fn ) );
 }
 
 template <typename Self, typename T, typename E>
@@ -113,14 +117,10 @@ auto FutureExtResultable<Self, T>::join( Futs &&... futs ) &&
 }
 
 template <typename Self>
-FutureExt<
-  Shared<
-	FutureExt<Self>, typename Self::Output>>
+FutureExt<Shared<typename Self::Output>>
   FutureExt<Self>::shared() &&
 {
-	return Shared<
-	  FutureExt<Self>, typename Self::Output>(
-	  std::move( *this ) );
+	return Shared<typename Self::Output>( std::move( *this ) );
 }
 
 }  // namespace _

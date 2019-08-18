@@ -18,7 +18,7 @@ namespace _
 using namespace std;
 using namespace traits;
 
-template <typename F, typename O>
+template <typename O>
 struct Shared;
 
 }  // namespace _
@@ -79,16 +79,63 @@ struct FutureExt : FutureExtResultable<Self, typename Self::Output>
 	static_assert( is_base_of<Future<>, Self>::value,
 				   "FutureExt must be derived from Future<>" );
 
-	FutureExt<
-	  Shared<
-		FutureExt<Self>, typename Self::Output>>
+	FutureExt<Shared<typename Self::Output>>
 	  shared() &&;
 
 	using FutureExtResultable<Self, typename Self::Output>::FutureExtResultable;
 };
 
-// template <typename T, typename E>
-// struct FutureExt<Result<T, E>> : FutureExt<>
+#ifdef KOI_CXX_GE_20
+template <typename Self>
+struct AwaiterImpl : NoCopy, NoMove
+{
+	template <typename P>
+	void await_suspend( coroutine_handle<P> h ) noexcept
+	{
+		h.promise().set_current_future( _ );
+	}
+	bool await_ready() noexcept { return false; }
+
+	AwaiterImpl( Self &&fut ) :
+	  _( std::move( fut ) ) {}
+
+protected:
+	Self _;
+};
+
+template <typename Self, typename R = void>
+struct TypedAwaiterImpl : AwaiterImpl<Self>
+{
+	R await_resume() noexcept
+	{
+		return this->_.get();
+	}
+
+	using AwaiterImpl<Self>::AwaiterImpl;
+};
+
+template <typename Self>
+struct TypedAwaiterImpl<Self> : AwaiterImpl<Self>
+{
+	void await_resume() noexcept
+	{
+	}
+
+	using AwaiterImpl<Self>::AwaiterImpl;
+};
+
+template <typename Self>
+struct Awaiter : TypedAwaiterImpl<Self, typename Self::Output>
+{
+	using TypedAwaiterImpl<Self, typename Self::Output>::TypedAwaiterImpl;
+};
+
+template <typename Self>
+auto operator co_await( FutureExt<Self> &&self )
+{
+	return Awaiter<FutureExt<Self>>( std::move( self ) );
+}
+#endif
 
 }  // namespace _
 

@@ -15,8 +15,8 @@ file(GLOB test_sources
 )
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-    add_compile_options(-std=c++17 -stdlib=libc++)
-    # add_compile_options(-std=c++2a -fcoroutines-ts -stdlib=libc++)
+    # add_compile_options(-std=c++17 -stdlib=libc++)
+    add_compile_options(-std=c++2a -fcoroutines-ts -stdlib=libc++)
     link_libraries(c++ c++abi)
 elseif(TRUE)
 endif()
