@@ -39,7 +39,11 @@ struct Cell final
 	  next( Empty() ) {}
 };
 
-template <typename T>
+struct SlabPlaceholder
+{
+};
+
+template <typename T = SlabPlaceholder>
 struct Slab final : ExplicitCopy
 {
 	using Index = _::Index;
@@ -72,6 +76,7 @@ struct Slab final : ExplicitCopy
 			next = _[ idx = next ].next;
 		}
 		new ( &_[ idx ] ) T( std::forward<Args>( args )... );
+		ent++;
 		return idx;
 	}
 
@@ -82,15 +87,19 @@ struct Slab final : ExplicitCopy
 		src.~T();
 		_[ idx ].next = next;
 		next = idx;
+		ent--;
 		return elem;
 	}
 
 	T const &operator[]( Index idx ) const { return _[ idx ]; }
 	T &operator[]( Index idx ) { return _[ idx ]; }
 
+	std::size_t size() const { return ent; }
+
 private:
 	vector<Cell<T>> _;
 	Index len = 0;
+	std::size_t ent = 0;
 	Index next = Null();
 };
 
