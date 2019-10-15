@@ -21,6 +21,8 @@ using namespace traits;
 template <typename O>
 struct Shared;
 
+struct SinkHandle;
+
 }  // namespace _
 
 }  // namespace utils
@@ -42,6 +44,8 @@ struct FutureExtResultable : FutureExtBasic<Self>
 {
 	template <typename F>
 	auto then( F &&fn ) &&;
+
+	auto gather( Arc<SinkHandle> const &h ) &&;
 
 	template <typename... Futs>
 	auto join( Futs &&... futs ) &&;

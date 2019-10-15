@@ -110,6 +110,12 @@ auto FutureExtResultable<Self, T>::then( F &&fn ) &&
 }
 
 template <typename Self, typename T>
+auto FutureExtResultable<Self, T>::gather( Arc<SinkHandle> const &h ) &&
+{
+	return _::gather( std::move( *this ), h );
+}
+
+template <typename Self, typename T>
 template <typename... Futs>
 auto FutureExtResultable<Self, T>::join( Futs &&... futs ) &&
 {

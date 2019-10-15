@@ -172,7 +172,7 @@ private:
 };
 #endif
 
-#define IMPL_OPTION_FOR_NONNULL_PTR( Ptr )                                     \
+#define KOI_IMPL_OPTION_FOR_NONNULL_PTR( Ptr )                                     \
 	template <typename T>                                                      \
 	struct Option<Ptr<T>> final                                                \
 	{                                                                          \
@@ -211,9 +211,11 @@ private:
 		Ptr<T> _;                                                              \
 	}
 
-IMPL_OPTION_FOR_NONNULL_PTR( NonNull );
-IMPL_OPTION_FOR_NONNULL_PTR( Box );
-IMPL_OPTION_FOR_NONNULL_PTR( Arc );
+KOI_IMPL_OPTION_FOR_NONNULL_PTR( NonNull );
+KOI_IMPL_OPTION_FOR_NONNULL_PTR( Box );
+KOI_IMPL_OPTION_FOR_NONNULL_PTR( Arc );
+
+#undef KOI_IMPL_OPTION_FOR_NONNULL_PTR
 
 }  // namespace _
 

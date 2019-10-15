@@ -5,7 +5,9 @@
 #include <list>
 
 #include <runtime/runtime.hpp>
-#include <reactor/reactor.hpp>
+#ifndef KOI_NO_LIBUV_REACTOR
+#  include <reactor/reactor.hpp>
+#endif
 #include <sync/queue.hpp>
 #include <future/future.hpp>
 #include <executor/executor.hpp>
@@ -24,7 +26,9 @@ using namespace std;
 using namespace chrono;
 using namespace traits::concepts;
 using namespace future;
+#ifndef KOI_NO_LIBUV_REACTOR
 using namespace reactor;
+#endif
 using namespace koi::utils;
 using namespace sync;
 
@@ -75,22 +79,30 @@ struct Executor final : executor::Executor
 	}
 	void run( nanoseconds const *timeout = nullptr )
 	{
+#ifndef KOI_NO_LIBUV_REACTOR
 		reactor.with( [=] {
-			while ( true ) {
+#endif
+		    while ( true ) {
 				scheduler.tick();
 				if ( scheduler.idle() ) {
 					return;
 				}
+#ifndef KOI_NO_LIBUV_REACTOR
 				if ( !reactor.idle() ) {
 					reactor.poll();
 				}
+#endif
 			}
+#ifndef KOI_NO_LIBUV_REACTOR
 		} );
+#endif
 	}
 
 private:
 	Scheduler scheduler;
+#ifndef KOI_NO_LIBUV_REACTOR
 	Reactor reactor;
+#endif
 	friend struct Runtime;
 };
 
