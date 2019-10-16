@@ -1,6 +1,3 @@
-[submodule "third_party/googletest"]
-	path = third_party/googletest
-	url = https://github.com/google/googletest.git
 [submodule "scripts"]
 	path = scripts
 	url = https://github.com/cad420/external.cmake
