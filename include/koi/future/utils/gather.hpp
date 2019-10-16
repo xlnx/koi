@@ -81,7 +81,7 @@ inline auto sink()
 {
 	return FutureExt<Sink>( Sink() );
 }
-	
+
 }  // namespace _
 
 using _::sink;

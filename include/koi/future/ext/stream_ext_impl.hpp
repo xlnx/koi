@@ -114,6 +114,21 @@ auto StreamExt<Self>::for_each( F &&fn ) &&
 	  } );
 }
 
+template <typename Self>
+auto StreamExt<Self>::drain() &&
+{
+	using Ret = Void;
+	return poll_fn<void>(
+	  [self = std::move( *this )]( Option<Ret> &_ ) mutable -> PollState {
+		  switch ( self.poll() ) {
+		  default: return PollState::Pending;
+		  case StreamState::Done:
+			  return PollState::Ok;
+			  // case StreamState::Yield:
+		  }
+	  } );
+}
+
 }  // namespace _
 
 }  // namespace future

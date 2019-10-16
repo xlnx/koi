@@ -20,7 +20,7 @@ struct With : NoCopy, NoHeap
 	void with( T &_, function<void()> const &fn )
 	{
 		auto old = this->_;
-		Bomb x( [this, old] { this->_ = old; } );
+		auto bomb = make_bomb( [this, old] { this->_ = old; } );
 		this->_ = &_;
 		fn();
 	}

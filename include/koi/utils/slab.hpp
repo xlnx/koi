@@ -3,6 +3,7 @@
 #include <vector>
 #include <new>
 #include <limits>
+#include <atomic>
 
 #include <traits/concepts.hpp>
 
@@ -94,12 +95,13 @@ struct Slab final : ExplicitCopy
 	T const &operator[]( Index idx ) const { return _[ idx ]; }
 	T &operator[]( Index idx ) { return _[ idx ]; }
 
-	std::size_t size() const { return ent; }
+	std::size_t size() const { return ent.load(); }
+	std::size_t capacity() const { return _.size(); }
 
 private:
 	vector<Cell<T>> _;
 	Index len = 0;
-	std::size_t ent = 0;
+	std::atomic<std::size_t> ent = 0;
 	Index next = Null();
 };
 

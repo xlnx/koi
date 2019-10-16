@@ -2,6 +2,7 @@
 
 #include <future/index.hpp>
 #include <utils/option.hpp>
+#include <utils/slice.hpp>
 #include <uv/request.hpp>
 #include <uv/poll.hpp>
 #include <uv/errors.hpp>
@@ -61,12 +62,16 @@ struct File
 		return File( req->result );
 	}
 
-	auto read( char *buf, size_t len ) const
+	auto read( ConstSlice<Slice<char>> const &slice, int64_t offset = -1 ) const
 	{
-		auto iov = uv_buf_init( buf, len );
+		std::vector<uv_buf_t> iov;
+		iov.reserve( slice.size() );
+		for ( auto &s : slice ) {
+			iov.emplace_back( uv_buf_init( s.data(), s.size() ) );
+		}
 		auto req = uv::request<uv_fs_t>(
 		  [=, _ = _]( uv_loop_t *selector, auto *request ) {
-			  uv_fs_read( selector, request->handle(), _->_, &iov, 1, -1,
+			  uv_fs_read( selector, request->handle(), _->_, iov.data(), iov.size(), offset,
 						  uv::into_poll<uv_fs_t> );
 		  } );
 		using Ret = Result<ssize_t, uv::err::Error>;
@@ -77,6 +82,14 @@ struct File
 			  } else {
 				  return Ret::Err( _->handle()->result );
 			  } } );
+	}
+	auto read( Slice<char> const &slice, int64_t offset = -1 ) const
+	{
+		return read( ConstSlice<Slice<char>>( &slice, 1 ), offset );
+	}
+	auto read( char *buf, size_t len, int64_t offset = -1 ) const
+	{
+		return read( Slice<char>( buf, len ), offset );
 	}
 	auto read_sync( char *buf, size_t len ) const
 	{

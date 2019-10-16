@@ -25,6 +25,7 @@ using utils::Async;
 using utils::lazy;
 using utils::poll_fn;
 using utils::sink;
+using utils::stream_poll_fn;
 
 }  // namespace future
 

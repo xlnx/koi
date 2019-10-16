@@ -6,7 +6,7 @@
 
 #include <runtime/runtime.hpp>
 #ifndef KOI_NO_LIBUV_REACTOR
-#  include <reactor/reactor.hpp>
+#include <reactor/reactor.hpp>
 #endif
 #include <sync/queue.hpp>
 #include <future/future.hpp>
@@ -82,7 +82,7 @@ struct Executor final : executor::Executor
 #ifndef KOI_NO_LIBUV_REACTOR
 		reactor.with( [=] {
 #endif
-		    while ( true ) {
+			while ( true ) {
 				scheduler.tick();
 				if ( scheduler.idle() ) {
 					return;

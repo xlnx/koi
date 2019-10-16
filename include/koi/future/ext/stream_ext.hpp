@@ -47,6 +47,8 @@ struct StreamExt : Self
 	template <typename F>
 	auto for_each( F &&fn ) &&;
 
+	auto drain() &&;
+
 	StreamExt( Self &&self ) :
 	  Self( std::move( self ) ) {}
 };
